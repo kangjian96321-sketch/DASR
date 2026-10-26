@@ -1,0 +1,4 @@
+{
+  "no_contrast": {"path": "./old_runs/no_contrast", "completed_through": "patch"},
+  "no_distillation": {"path": "./old_runs/no_distillation", "completed_through": "pgd"}
+}

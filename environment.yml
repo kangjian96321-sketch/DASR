@@ -1,0 +1,16 @@
+# Linux/Windows NVIDIA training recipe. Not a lockfile or a GPU validation claim.
+name: dasr-pace
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - git
+  - pytorch=2.4.1
+  - torchvision=0.19.1
+  - pytorch-cuda=12.1
+  - pip:
+      - -r requirements-dev.txt
+      - -r requirements-autoattack.txt

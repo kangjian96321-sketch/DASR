@@ -1,0 +1,13 @@
+{
+  "scope": "Observed local CPU regression runtime; not a CUDA or clean Conda solve validation",
+  "python": "3.12.14",
+  "platform": "Windows",
+  "torch": "2.4.1+cpu",
+  "torchvision": "0.19.1+cpu",
+  "numpy": "1.26.4",
+  "matplotlib": "3.9.4",
+  "scikit-learn": "1.3.2",
+  "pytest": "7.4.4",
+  "Pillow": "12.3.0",
+  "autoattack": "Mocked for regression; real package required for final scientific evaluation"
+}

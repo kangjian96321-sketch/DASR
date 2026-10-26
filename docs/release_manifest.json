@@ -1,0 +1,494 @@
+{
+  "release": "DASR_PACE_GitHub_20261025",
+  "base_snapshot": "PACE_SSEAT_CRT_clean_linf_l2_patch_20261022",
+  "crt_alr_source": "PACE_CRT_official_LpALR_bestfix_20261015/pace_aligned/crt_lp_alr.py",
+  "manifest_excludes_itself": true,
+  "file_count_excluding_manifest": 85,
+  "modified_relative_to_base": [
+    "examples/checkpoint_map.json",
+    "far_replay.py",
+    "my_functions/resnet_base.py",
+    "pace_aligned/__init__.py",
+    "pace_aligned/common.py",
+    "pace_aligned/continual_baselines.py",
+    "pace_aligned/crt.py",
+    "pace_aligned/feature_plots.py",
+    "pace_aligned/joint.py",
+    "pace_aligned/sseat.py",
+    "requirements-dev.txt",
+    "requirements.txt",
+    "sequence_clean_linf_l2_patch.py",
+    "tests/test_autoattack_memory.py",
+    "tests/test_backbones.py",
+    "tests/test_baseline_completion.py",
+    "tests/test_clean_linf_l2_patch.py",
+    "tests/test_far_replay_sources.py",
+    "tests/test_four_baselines.py",
+    "train_crt_clean_linf_l2_patch.py",
+    "train_replay_comparison.py"
+  ],
+  "added_relative_to_base": [
+    ".gitattributes",
+    ".github/workflows/tests.yml",
+    ".gitignore",
+    "check_crt_lp_alr.py",
+    "docs/changes.md",
+    "docs/crt_alr_parity.json",
+    "docs/github_upload_zh.md",
+    "docs/protocol.md",
+    "docs/test_environment.json",
+    "docs/TEST_REPORT.md",
+    "environment-cpu.yml",
+    "environment.yml",
+    "pace_aligned/crt_lp_alr.py",
+    "pace_aligned/selection.py",
+    "README.md",
+    "README_zh.md",
+    "requirements-autoattack.txt",
+    "sequence_entries.py",
+    "tests/conftest.py",
+    "tests/test_release_protocol.py",
+    "THIRD_PARTY_NOTICES.md",
+    "train_derpp_clean_linf_l2_patch.py",
+    "train_derpp_clean_patch_l2_linf.py",
+    "train_gsa_clean_linf_l2_patch.py",
+    "train_gsa_clean_patch_l2_linf.py",
+    "train_joint_clean_linf_l2_patch.py",
+    "train_joint_clean_patch_l2_linf.py",
+    "train_mart_clean_linf_l2_patch.py",
+    "train_mart_clean_patch_l2_linf.py",
+    "train_trades_clean_linf_l2_patch.py",
+    "train_trades_clean_patch_l2_linf.py"
+  ],
+  "python_files_omitted_from_base": [
+    "pace_aligned/cad.py",
+    "train_cad_pace_aligned.py"
+  ],
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 100,
+      "sha256": "ce228e2101efe99165258114379b7927b8f7c3c41c0619c4a73a161ebfc488a6"
+    },
+    {
+      "path": ".github/workflows/tests.yml",
+      "bytes": 573,
+      "sha256": "1d96215320069b87d906836a69974d6b7526bda33267fc696ec6b7d550e7398b"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 430,
+      "sha256": "8c28ce9c0105c335bc1caea0ee93744f6f821e7b82b35a63d932b6a017ee37b0"
+    },
+    {
+      "path": "ablation_config.py",
+      "bytes": 2678,
+      "sha256": "ecfd4e137a944e157f5b4cebd77a8ff7d99a02543e327f9473e88ffe6a6ef2ba"
+    },
+    {
+      "path": "check_crt_lp_alr.py",
+      "bytes": 6893,
+      "sha256": "3ae2fe2295b4d12f96f485ba37b7cce0380afca353c58bd3099ab562b050f1d4"
+    },
+    {
+      "path": "checkpoint_compat.py",
+      "bytes": 11980,
+      "sha256": "c4779e327c1f9287cefcae88a4b8f59a3f3c1f1ed0516a165ba39b7ac584206c"
+    },
+    {
+      "path": "docs/changes.md",
+      "bytes": 3045,
+      "sha256": "739369bcfa3168df1ead9d6f6eb956442f547b9ec9a1fde2bb77ce9b8ab321d2"
+    },
+    {
+      "path": "docs/crt_alr_parity.json",
+      "bytes": 11148,
+      "sha256": "a67348b82391d9e21df90b7761389f5540c445e9396640acfdb7fbd59296e4b0"
+    },
+    {
+      "path": "docs/github_upload_zh.md",
+      "bytes": 2917,
+      "sha256": "5a8407c8967d1c7b22f187dd470c7a4549d8ba957e5274ebf6dc6a07e90eeb54"
+    },
+    {
+      "path": "docs/protocol.md",
+      "bytes": 8048,
+      "sha256": "3611cfdbc27c426e370a3d5f983211724c9f33b9c8d8bf338c32a25242e47879"
+    },
+    {
+      "path": "docs/test_environment.json",
+      "bytes": 414,
+      "sha256": "1a35a2ce677d85f8c5526c3a3126fde830aaced257586d9bc25f9e69cbe42edd"
+    },
+    {
+      "path": "docs/TEST_REPORT.md",
+      "bytes": 3761,
+      "sha256": "4d50cd6d63a2d549e05adde4e9a1dde806ec15e0ba2276e5be1aec852481fbec"
+    },
+    {
+      "path": "environment-cpu.yml",
+      "bytes": 237,
+      "sha256": "495e11a570c6ee6d26b93f3cd0334880af2a897500d1625ac57a73e4de73a19c"
+    },
+    {
+      "path": "environment.yml",
+      "bytes": 336,
+      "sha256": "51f4e2183befc9c0ec105007498f955b35089d5d571359b53d82b78b79cd1409"
+    },
+    {
+      "path": "examples/checkpoint_map.json",
+      "bytes": 175,
+      "sha256": "558585afb2c7966005a97340fd2060aeec497bb95b5d106b7805583d5eb251e9"
+    },
+    {
+      "path": "export_run_artifacts.py",
+      "bytes": 5064,
+      "sha256": "fcf435a6c5995a208af0b04408891d99ad3c3f6d1f74d28ed33201dd225f613c"
+    },
+    {
+      "path": "far_replay.py",
+      "bytes": 29507,
+      "sha256": "0d26816941612e4d34c8c6dcb2f135321a319145e66f0f7a9ce8a7135f169688"
+    },
+    {
+      "path": "my_functions/__init__.py",
+      "bytes": 224,
+      "sha256": "acbae6d10853aa45d4d179752683017d4a79387e46584c95f81af5016d043b08"
+    },
+    {
+      "path": "my_functions/adversary_tools.py",
+      "bytes": 11540,
+      "sha256": "4273de6ded91609bd9d82eb5aab1dfb0c7a8cd0d5e08b187c89087fc83cb1332"
+    },
+    {
+      "path": "my_functions/backbone_options.py",
+      "bytes": 1711,
+      "sha256": "b263cdc77ac68ea91b75e2b3899efa1cb5a1b70dbfcf49b18b2ddf84ab95b737"
+    },
+    {
+      "path": "my_functions/resnet_base.py",
+      "bytes": 2122,
+      "sha256": "69c16c99215af4069316cb53d3444eea1bd22b2b630fa5a5cf1a9d8eac19397b"
+    },
+    {
+      "path": "my_functions/shared_base.py",
+      "bytes": 6677,
+      "sha256": "a378034a844477392b4cf4ebcbd01c8d3f4026d13a0413fd6cb31bd493eb6fbc"
+    },
+    {
+      "path": "pace_aligned/__init__.py",
+      "bytes": 128,
+      "sha256": "4cfbcda43318a14cf7d46238fa2d77054fa61810258360215286d58c459a73a8"
+    },
+    {
+      "path": "pace_aligned/baseline_losses.py",
+      "bytes": 9016,
+      "sha256": "fc016f2c742fe752f7052b4315c7f0f01a2343c3ad481d4e3e837158e68e60a7"
+    },
+    {
+      "path": "pace_aligned/baseline_memory.py",
+      "bytes": 4979,
+      "sha256": "37d965d5e8bbeddbed92a8707275d5c26584e4d6defbb51e1b8fe832ffd5848b"
+    },
+    {
+      "path": "pace_aligned/common.py",
+      "bytes": 59579,
+      "sha256": "c2725d7a35f7e4dfb1367a0bf5dfb40b7e5df9afba7a166c8b3f7e72cd1a8a31"
+    },
+    {
+      "path": "pace_aligned/continual_baselines.py",
+      "bytes": 23825,
+      "sha256": "e9046536609e8a87d93df5926c31a8032a053457ffcf4924204d11e777b4dfb9"
+    },
+    {
+      "path": "pace_aligned/crt.py",
+      "bytes": 22707,
+      "sha256": "f8528d60ded11a8d371c68c55c07ed466495dfa54c461c354765ba524dabb8aa"
+    },
+    {
+      "path": "pace_aligned/crt_lp_alr.py",
+      "bytes": 4405,
+      "sha256": "6e102cb455bff47aafd328873b1b24f433abb35f92b85f7003b0109f468bd909"
+    },
+    {
+      "path": "pace_aligned/feature_plots.py",
+      "bytes": 37558,
+      "sha256": "e795e1d0bf1d478a3d811401600950e998e47e0dfeac0dc990963948e1096bbb"
+    },
+    {
+      "path": "pace_aligned/joint.py",
+      "bytes": 25288,
+      "sha256": "baa618384341eb161b61efe61679dbd3ccd7ef539e1acd96a039720c89b1eec2"
+    },
+    {
+      "path": "pace_aligned/selection.py",
+      "bytes": 1792,
+      "sha256": "e0bd2b39191a62170d6732229eb1a01f97bcf7495b809cd181bcecf6e6c13367"
+    },
+    {
+      "path": "pace_aligned/sseat.py",
+      "bytes": 25005,
+      "sha256": "e17f057048e2498e6645c8a97c21e26eee6e700b887a18a5dc443d5604e7fce4"
+    },
+    {
+      "path": "pace_components.py",
+      "bytes": 23848,
+      "sha256": "0c0ff431bffc6cbd66483d01ddbc07db7486babd184f11013ce93b59ec550c31"
+    },
+    {
+      "path": "plot_final_features.py",
+      "bytes": 985,
+      "sha256": "49c9d8cca16ee27ee4af990ea8ae46c44c4f461ae99189b9cabc56c33ed2ce0c"
+    },
+    {
+      "path": "README.md",
+      "bytes": 12353,
+      "sha256": "809f65d9443667e80e6f05560700c285dd0ef8fa31a7f560414e909470df0e1a"
+    },
+    {
+      "path": "README_zh.md",
+      "bytes": 12445,
+      "sha256": "6ef832d2b73684ec258fdcf0dc5f9d1d7baeb588659efb33a27dd9d68b7a93c4"
+    },
+    {
+      "path": "replay_policies.py",
+      "bytes": 4991,
+      "sha256": "90289097437b4248765fb4db657b5f2ebed2177efe7fe77bb6ca827fa4e174a6"
+    },
+    {
+      "path": "requirements-autoattack.txt",
+      "bytes": 125,
+      "sha256": "7db62265981a3668c737a89969396f1756dc72ca79236af7ea6005dfb8b36d5b"
+    },
+    {
+      "path": "requirements-dev.txt",
+      "bytes": 34,
+      "sha256": "cf35a1c8010d1e4106b875501c12b7f982e25f092c3ae44a2d149e953a04e0f9"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 138,
+      "sha256": "5d47586e80b312ddf48fcf30f63beb62b895e862238826195625ca1e53d5795b"
+    },
+    {
+      "path": "run_ablations.py",
+      "bytes": 4166,
+      "sha256": "13d1211e6e88643930e36b1990964ede38a5450b33713e37e1fd380a7dfe9e82"
+    },
+    {
+      "path": "run_far_source_modes.py",
+      "bytes": 3197,
+      "sha256": "7028c3643edc849babfcaf5253103e58d6a39d028728d3867a153d87e376ce00"
+    },
+    {
+      "path": "run_replay_study.py",
+      "bytes": 3645,
+      "sha256": "c5cd075f3622b43ad9582dc871c641b336f0aa4028679dd55d090eda5945a244"
+    },
+    {
+      "path": "sequence_clean_linf_l2_patch.py",
+      "bytes": 1633,
+      "sha256": "01caeea52ae05c6368c414f0bb1d2e8ee602301b039ec5731b30293e72a8057d"
+    },
+    {
+      "path": "sequence_entries.py",
+      "bytes": 1256,
+      "sha256": "f16f20a2baa6443b55c3d885cba872aa0af6174808cf8b4216011ccfd84c830f"
+    },
+    {
+      "path": "summarize_ablations.py",
+      "bytes": 6470,
+      "sha256": "c90e1de991587087ab7ba6dc0667f8d63678c745d44884d12e01e7586e8db613"
+    },
+    {
+      "path": "summarize_replay_study.py",
+      "bytes": 8055,
+      "sha256": "11b97b3c6bdea003825cac9526ce06c363a8f80fe80cd5b88f35f6f616458039"
+    },
+    {
+      "path": "tests/conftest.py",
+      "bytes": 896,
+      "sha256": "619d77d28bb90b64595dcc4e21c6460c4064dee040276710a5d8e904d74b4f44"
+    },
+    {
+      "path": "tests/test_ablations_and_import.py",
+      "bytes": 15288,
+      "sha256": "e6b8b8b10c0060521abe7d6837058da0717ec2eb504fb22976f79d3ef774e241"
+    },
+    {
+      "path": "tests/test_autoattack_balanced.py",
+      "bytes": 7558,
+      "sha256": "6d2b30c8347867cfe54a4818d5512a3efa3a2413d12bbed7087b85f8f263f86a"
+    },
+    {
+      "path": "tests/test_autoattack_memory.py",
+      "bytes": 11615,
+      "sha256": "ba0689d0174a5eaaa433b6e20aaf58d211748df4e25dec635be183835e65cfdc"
+    },
+    {
+      "path": "tests/test_backbones.py",
+      "bytes": 14212,
+      "sha256": "07c89ead73b4afd83431166fb59eda8cdb4b03a315174be3ab4b0d7409786792"
+    },
+    {
+      "path": "tests/test_baseline_completion.py",
+      "bytes": 4974,
+      "sha256": "ed7291b89bcea66da7a6516c28513ebb0455581260dab0cb830b5c6d0d3be600"
+    },
+    {
+      "path": "tests/test_clean_linf_l2_patch.py",
+      "bytes": 7682,
+      "sha256": "7a8df7475ad5b3662c6b859149d888bd8cbb0a26455e78de4dcd09426eeeefca"
+    },
+    {
+      "path": "tests/test_far_replay_sources.py",
+      "bytes": 6350,
+      "sha256": "7b4a889e497d284ef8a7bb4c2c00d3c854cb0bbf05375056a49cedb34d01b7cf"
+    },
+    {
+      "path": "tests/test_final_feature_plots.py",
+      "bytes": 12457,
+      "sha256": "82e2ca28012de412d72ea860678a36f61fe808f0b949c28d3c3e61b8a493d9ad"
+    },
+    {
+      "path": "tests/test_four_baselines.py",
+      "bytes": 18364,
+      "sha256": "27096415b5613c0a32ad12a708e96862d69beeda1569d4ddf51a72a9d969bdcd"
+    },
+    {
+      "path": "tests/test_joint_training.py",
+      "bytes": 14780,
+      "sha256": "87db48ae05460720039fbc2501497f00f11d5293911368e4f4063526f67f519b"
+    },
+    {
+      "path": "tests/test_release_protocol.py",
+      "bytes": 8355,
+      "sha256": "7a97efab436d00adb828740164027ba33b603c4337ae5ec184c382755134bd6e"
+    },
+    {
+      "path": "tests/test_replay.py",
+      "bytes": 5128,
+      "sha256": "9fcbe131ea1574e4f778b9cc6aa7d0b89a3afef1a2f2ee8f648f1d0387c320e2"
+    },
+    {
+      "path": "tests/test_sseat_crt_new_sequence.py",
+      "bytes": 8807,
+      "sha256": "3706bd17551f06b8fec3561fc78e39089bd2b72ba0f303df4546896a19b0edc9"
+    },
+    {
+      "path": "tests/test_trainer_resume.py",
+      "bytes": 8722,
+      "sha256": "9797e26b3f7fa3ceb63c4b8996a7d4a872cb5c5d34e04d26e3372e237618cd0c"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "bytes": 1828,
+      "sha256": "ee3424b2e5d5a308d9253e6ad94c4d826ac4634ef67880c8143ae52df51c3956"
+    },
+    {
+      "path": "train_crt_clean_linf_l2_patch.py",
+      "bytes": 999,
+      "sha256": "4aaec00d5aadbf722a711f25bd71aaf5cc8e1fffc4c7b1f110f91e3520448142"
+    },
+    {
+      "path": "train_crt_pace_aligned.py",
+      "bytes": 127,
+      "sha256": "0106a792c9c80912a621694a4ac6bd129034b3aa0238abb1b77dd459a3ca04db"
+    },
+    {
+      "path": "train_derpp_baseline.py",
+      "bytes": 180,
+      "sha256": "0052c1abf4bb489b2fb4c7a66ab5f0bc68f8a6be57acb6696b3714bf54e7f45a"
+    },
+    {
+      "path": "train_derpp_clean_linf_l2_patch.py",
+      "bytes": 256,
+      "sha256": "d4d1a6f6a837932a26d6995e579f77fc5cabfb7e779d5b73820a2cd4cce50049"
+    },
+    {
+      "path": "train_derpp_clean_patch_l2_linf.py",
+      "bytes": 256,
+      "sha256": "7253724fa98ddee60c346f80b79df9f3c5f521dfbd437432e35e890fab2a944f"
+    },
+    {
+      "path": "train_gsa_baseline.py",
+      "bytes": 170,
+      "sha256": "9f1e2736ed20ff37262532f0514086c110056833e83a164d9ec0754d428f9fe3"
+    },
+    {
+      "path": "train_gsa_clean_linf_l2_patch.py",
+      "bytes": 252,
+      "sha256": "309a5b02ed59ca80141c322a54c0bfa4a134b7a72c299fc65a138a63acb2546e"
+    },
+    {
+      "path": "train_gsa_clean_patch_l2_linf.py",
+      "bytes": 252,
+      "sha256": "664c4b6595b69664b7d1700f480c2d2b0ed77c629b544094a848d38ac029e441"
+    },
+    {
+      "path": "train_joint_clean_linf_l2_patch.py",
+      "bytes": 275,
+      "sha256": "52c8a44bad0aa86b5b38e129abefd5ffdeb94f7a3e7e339809319ed619fda9cc"
+    },
+    {
+      "path": "train_joint_clean_patch_l2_linf.py",
+      "bytes": 275,
+      "sha256": "87a38905e988aab326effc942b9cbee075a4567abaf08690a8e6558cfae61bf5"
+    },
+    {
+      "path": "train_joint_pace_aligned.py",
+      "bytes": 152,
+      "sha256": "47c1670e6decc856378a0df55b7bd7491907cadd46c04c9cf38d7ff14ad2ac4f"
+    },
+    {
+      "path": "train_mart.py",
+      "bytes": 173,
+      "sha256": "49e3ece9679e31bf99e310d6ff937ea0a533a9390df30ef91953ed2ec9cb9337"
+    },
+    {
+      "path": "train_mart_clean_linf_l2_patch.py",
+      "bytes": 254,
+      "sha256": "f2d35b98b8cb01efa9b69db2ff7f57ebf16a86fb611294b34da72dea26ac66f1"
+    },
+    {
+      "path": "train_mart_clean_patch_l2_linf.py",
+      "bytes": 254,
+      "sha256": "eb2843edd708f5c20c768af3d95749ffaee442307cca8e99e1cd2173be928ee3"
+    },
+    {
+      "path": "train_pace_clean_linf_l2_patch.py",
+      "bytes": 1090,
+      "sha256": "62704a4c147e0ca4ee0059ef1b548023f6a46a733ab5137dc24bfbe11e41bf19"
+    },
+    {
+      "path": "train_replay_comparison.py",
+      "bytes": 66362,
+      "sha256": "458e358723283fd6c821dc6478b8973695300a61b0e67291a9a6e081520bd4d7"
+    },
+    {
+      "path": "train_sseat_clean_linf_l2_patch.py",
+      "bytes": 555,
+      "sha256": "6a7b47f8e8f3f829129947a96ef9204415d73c77e8644d0770ae8c742db0d226"
+    },
+    {
+      "path": "train_sseat_pace_aligned.py",
+      "bytes": 131,
+      "sha256": "bd1edca14c7f7aa3bfd8d1c6422f2a7bc9821eb6091c3ac46a64b26e2888d07f"
+    },
+    {
+      "path": "train_trades.py",
+      "bytes": 183,
+      "sha256": "d381c4957befebb357239429afc0fc817501ece82962b7e985298c4294ae9cc2"
+    },
+    {
+      "path": "train_trades_clean_linf_l2_patch.py",
+      "bytes": 258,
+      "sha256": "5edb0f9b9b19972402b206f65be3e5bd5c8c6d54be03052776f28cea79e80ae3"
+    },
+    {
+      "path": "train_trades_clean_patch_l2_linf.py",
+      "bytes": 258,
+      "sha256": "8da709bdd598fea4a74bd283581baca9f0a8bf4706f929f62ed9c835f685765d"
+    }
+  ]
+}

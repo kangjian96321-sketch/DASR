@@ -1,0 +1,14 @@
+name: dasr-pace-cpu
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - git
+  - pytorch=2.4.1
+  - torchvision=0.19.1
+  - cpuonly
+  - pip:
+      - -r requirements-dev.txt
+      - -r requirements-autoattack.txt

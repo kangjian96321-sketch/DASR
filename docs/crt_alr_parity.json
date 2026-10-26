@@ -1,0 +1,493 @@
+{
+  "reference_commit": "5a6932430219d531aab5736de94292b149ff73ae",
+  "source_sha256": "87ba0a7f348ab802f03fd31156abc860a0809147bb9b1fc0dc1bbd56db9a937d",
+  "source": "train/reg_utils.py:L2Reg(var_reg=False)",
+  "device": "cpu",
+  "torch_version": "2.4.1+cpu",
+  "dtype": "float32",
+  "reference_adjustment": "only .cuda() -> .to(selected_device)",
+  "scope": "single ALR call: perturbation, loss, outer gradients and BN state",
+  "passed": 60,
+  "cases": [
+    {
+      "task": "pgd_l2",
+      "steps": 1,
+      "training": false,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 1,
+      "training": false,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 1,
+      "training": false,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 1,
+      "training": true,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 1,
+      "training": true,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 1,
+      "training": true,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 2,
+      "training": false,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 2,
+      "training": false,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 2,
+      "training": false,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 2,
+      "training": true,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 2,
+      "training": true,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 2,
+      "training": true,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 3,
+      "training": false,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 3,
+      "training": false,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 3,
+      "training": false,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 3,
+      "training": true,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 3,
+      "training": true,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 3,
+      "training": true,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 4,
+      "training": false,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 4,
+      "training": false,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 4,
+      "training": false,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 4,
+      "training": true,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 4,
+      "training": true,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 4,
+      "training": true,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 10,
+      "training": false,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 10,
+      "training": false,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 10,
+      "training": false,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 10,
+      "training": true,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 10,
+      "training": true,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd_l2",
+      "steps": 10,
+      "training": true,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 1,
+      "training": false,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 1,
+      "training": false,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 1,
+      "training": false,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 1,
+      "training": true,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 1,
+      "training": true,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 1,
+      "training": true,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 2,
+      "training": false,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 2,
+      "training": false,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 2,
+      "training": false,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 2,
+      "training": true,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 2,
+      "training": true,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 2,
+      "training": true,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 3,
+      "training": false,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 3,
+      "training": false,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 3,
+      "training": false,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 3,
+      "training": true,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 3,
+      "training": true,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 3,
+      "training": true,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 4,
+      "training": false,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 4,
+      "training": false,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 4,
+      "training": false,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 4,
+      "training": true,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 4,
+      "training": true,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 4,
+      "training": true,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 10,
+      "training": false,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 10,
+      "training": false,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 10,
+      "training": false,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 10,
+      "training": true,
+      "model": "smooth",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 10,
+      "training": true,
+      "model": "bn_dropout",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    },
+    {
+      "task": "pgd",
+      "steps": 10,
+      "training": true,
+      "model": "zero_gradient",
+      "maximum_absolute_difference": 0.0,
+      "passed": true
+    }
+  ]
+}
