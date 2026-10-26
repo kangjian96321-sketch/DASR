@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 
-from pace_aligned.feature_plots import add_feature_arguments, plot_cached_features
+from dasr_aligned.feature_plots import add_feature_arguments, plot_cached_features
 
 
 def main(argv=None):

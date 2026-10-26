@@ -12,8 +12,8 @@ import torch
 from torch.utils.data import DataLoader, Dataset, Subset
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pace_aligned import common, feature_plots
-import train_replay_comparison as pace
+from dasr_aligned import common, feature_plots
+import train_DASR as dasr
 
 
 class LabelsOnly(Dataset):
@@ -30,7 +30,7 @@ class LabelsOnly(Dataset):
 @pytest.mark.parametrize("dataset_name,classes", [("imagenette", 10), ("cifar10", 10), ("cifar100", 100)])
 def test_exact_1000_balanced_no_replacement_from_imbalanced_pool(dataset_name, classes):
     dataset = LabelsOnly([120 + label for label in range(classes)])
-    cfg = common.ExperimentConfig(method="pace", dataset=dataset_name, autoattack_samples=1000)
+    cfg = common.ExperimentConfig(method="dasr", dataset=dataset_name, autoattack_samples=1000)
     ids = common.autoattack_subset_indices(dataset, cfg)
     assert len(ids) == len(set(ids)) == 1000
     assert Counter(dataset.targets[index] for index in ids) == dict.fromkeys(range(classes), 1000 // classes)
@@ -41,7 +41,7 @@ def test_exact_1000_balanced_no_replacement_from_imbalanced_pool(dataset_name, c
 
 def test_nondivisible_size_and_fixed_remainder_allocation():
     dataset = LabelsOnly([200] * 10)
-    cfg = common.ExperimentConfig(method="pace", dataset="imagenette", autoattack_samples=1003)
+    cfg = common.ExperimentConfig(method="dasr", dataset="imagenette", autoattack_samples=1003)
     ids = common.autoattack_subset_indices(dataset, cfg)
     counts = Counter(dataset.targets[index] for index in ids)
     assert sorted(counts.values()) == [100] * 7 + [101] * 3
@@ -54,7 +54,7 @@ def test_full_set_keeps_natural_imbalance_and_original_order(requested):
     # Use its exact size, a larger request, and explicit 0.
     if requested == 210:
         requested = len(dataset)
-    cfg = common.ExperimentConfig(method="pace", dataset="imagenette", autoattack_samples=requested)
+    cfg = common.ExperimentConfig(method="dasr", dataset="imagenette", autoattack_samples=requested)
     ids = common.autoattack_subset_indices(dataset, cfg)
     assert sorted(ids) == list(range(len(dataset)))
     assert Counter(dataset.targets[index] for index in ids) == Counter(dataset.targets)
@@ -63,7 +63,7 @@ def test_full_set_keeps_natural_imbalance_and_original_order(requested):
 
 def test_shortage_never_silently_oversamples_or_changes_requested_count():
     dataset = LabelsOnly([1] + [20] * 9)
-    cfg = common.ExperimentConfig(method="pace", dataset="imagenette", autoattack_samples=100)
+    cfg = common.ExperimentConfig(method="dasr", dataset="imagenette", autoattack_samples=100)
     with pytest.raises(ValueError, match="Class 0 has 1 samples, but 10 are required"):
         common.autoattack_subset_indices(dataset, cfg)
     cfg.autoattack_samples = 0
@@ -72,7 +72,7 @@ def test_shortage_never_silently_oversamples_or_changes_requested_count():
 
 def test_missing_class_and_invalid_label_are_explicit_errors():
     dataset = LabelsOnly([0] + [20] * 9)
-    cfg = common.ExperimentConfig(method="pace", dataset="imagenette", autoattack_samples=100)
+    cfg = common.ExperimentConfig(method="dasr", dataset="imagenette", autoattack_samples=100)
     with pytest.raises(ValueError, match="missing classes"):
         common.autoattack_subset_indices(dataset, cfg)
     dataset.targets[-1] = 10
@@ -82,7 +82,7 @@ def test_missing_class_and_invalid_label_are_explicit_errors():
 
 def test_subset_mapping_method_independence_and_global_rng_isolation():
     dataset = Subset(LabelsOnly([20] * 10), list(reversed(range(200))))
-    cfg = common.ExperimentConfig(method="pace", dataset="imagenette", autoattack_samples=100)
+    cfg = common.ExperimentConfig(method="dasr", dataset="imagenette", autoattack_samples=100)
     py_state, torch_state = random.getstate(), torch.get_rng_state().clone()
     ids = common.autoattack_subset_indices(dataset, cfg)
     assert random.getstate() == py_state and torch.equal(torch.get_rng_state(), torch_state)
@@ -92,7 +92,7 @@ def test_subset_mapping_method_independence_and_global_rng_isolation():
 
 
 def test_old_random_subset_feature_cache_cannot_be_reused(tmp_path):
-    cfg = common.ExperimentConfig(method="pace", dataset="imagenette", output_root=str(tmp_path))
+    cfg = common.ExperimentConfig(method="dasr", dataset="imagenette", output_root=str(tmp_path))
     model = torch.nn.Linear(3, 10)
     loader = DataLoader(LabelsOnly([200] * 10))
     current = feature_plots.make_feature_store(model, loader, cfg)
@@ -109,7 +109,7 @@ def test_old_random_subset_feature_cache_cannot_be_reused(tmp_path):
     assert current.manifest["spec"]["autoattack_sampling_policy"] == common.AUTOATTACK_SAMPLING_POLICY
 
 
-def test_legacy_pace_accuracy_cache_is_invalidated_without_retraining(tmp_path, monkeypatch):
+def test_legacy_dasr_accuracy_cache_is_invalidated_without_retraining(tmp_path, monkeypatch):
     from ablation_config import method_name
     cfg = common.ExperimentConfig(
         method=method_name("uniform", "full"), dataset="cifar10", device="cpu", workers=0,
@@ -117,7 +117,7 @@ def test_legacy_pace_accuracy_cache_is_invalidated_without_retraining(tmp_path, 
         batch_size=4, train_attack_steps=1, eval_attack_steps=1,
         task_epochs=dict.fromkeys(common.TASKS, 1), max_train_batches=1, max_eval_batches=1,
         final_test_methods=("clean",))
-    current_digest = pace.digest
+    current_digest = dasr.digest
 
     def legacy_digest(value):
         if isinstance(value, dict) and "model" in value and "autoattack_samples" in value:
@@ -125,26 +125,26 @@ def test_legacy_pace_accuracy_cache_is_invalidated_without_retraining(tmp_path, 
             value.pop("autoattack_sampling_policy", None)
         return current_digest(value)
 
-    monkeypatch.setattr(pace, "digest", legacy_digest)
-    pace.run_experiment(cfg, policy="uniform", smoke=True)
+    monkeypatch.setattr(dasr, "digest", legacy_digest)
+    dasr.run_experiment(cfg, policy="uniform", smoke=True)
     old_meta = json.loads((cfg.run_dir / "final_test_meta.json").read_text())
     old_identity = json.loads((cfg.run_dir / "run_complete.json").read_text())["identity"]
-    monkeypatch.setattr(pace, "digest", current_digest)
-    monkeypatch.setattr(pace, "train_epoch", lambda *a, **kw: pytest.fail("Unexpected retraining"))
+    monkeypatch.setattr(dasr, "digest", current_digest)
+    monkeypatch.setattr(dasr, "train_epoch", lambda *a, **kw: pytest.fail("Unexpected retraining"))
     measured = []
-    original_evaluate = pace.evaluate_seen
+    original_evaluate = dasr.evaluate_seen
 
     def track_evaluation(*args, **kwargs):
         measured.append(args[2])
         return original_evaluate(*args, **kwargs)
 
-    monkeypatch.setattr(pace, "evaluate_seen", track_evaluation)
+    monkeypatch.setattr(dasr, "evaluate_seen", track_evaluation)
     cfg.resume = True
-    pace.run_experiment(cfg, policy="uniform", smoke=True, eval_only=True)
+    dasr.run_experiment(cfg, policy="uniform", smoke=True, eval_only=True)
     new_meta = json.loads((cfg.run_dir / "final_test_meta.json").read_text())
     assert new_meta["fingerprint"] != old_meta["fingerprint"]
     assert new_meta["evaluation_settings"]["autoattack_sampling_policy"] == common.AUTOATTACK_SAMPLING_POLICY
     assert json.loads((cfg.run_dir / "run_complete.json").read_text())["identity"] == old_identity
     assert measured == [["clean"]]
-    pace.run_experiment(cfg, policy="uniform", smoke=True, eval_only=True)
+    dasr.run_experiment(cfg, policy="uniform", smoke=True, eval_only=True)
     assert measured == [["clean"]]  # Once updated, results are reusable.

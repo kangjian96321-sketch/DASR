@@ -11,10 +11,10 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pace_aligned import continual_baselines as runner
-from pace_aligned import baseline_losses as losses
-from pace_aligned.baseline_memory import ReplayMemory
-from pace_aligned.common import DataBundle, EMA, ExperimentConfig, make_backbone
+from dasr_aligned import continual_baselines as runner
+from dasr_aligned import baseline_losses as losses
+from dasr_aligned.baseline_memory import ReplayMemory
+from dasr_aligned.common import DataBundle, EMA, ExperimentConfig, make_backbone
 
 
 @pytest.fixture(autouse=True)

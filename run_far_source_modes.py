@@ -21,7 +21,7 @@ def build_commands(args, extra):
     }
     if any(value.split("=")[0] in forbidden for value in extra):
         raise ValueError("Use this launcher's identity options")
-    entry = Path(__file__).with_name("train_replay_comparison.py")
+    entry = Path(__file__).with_name("train_DASR.py")
     backbone = getattr(args, "backbone", "wrn")
     commands = []
     for seed in args.seeds:

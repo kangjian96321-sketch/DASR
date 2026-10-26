@@ -1,7 +1,7 @@
 """CRT on Clean -> PGD-Linf -> PGD-L2 -> Patch; native Croce/ALR unchanged."""
 import json
 
-from pace_aligned import crt
+from dasr_aligned import crt
 from sequence_clean_linf_l2_patch import entry_defaults, set_sequence, validate_resume_sequence
 
 

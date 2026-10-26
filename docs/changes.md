@@ -1,5 +1,13 @@
 # 本次修改前后对比
 
+## 20261026：仅命名更新
+
+模块、入口、方法标签、默认运行名、文档和测试统一为 DASR。主入口为 `train_DASR.py`。
+本次没有再次修改以下训练机制；下表是 20261025 发布版相对早期项目的历史变更。
+完整更名清单与旧文件移除步骤见 [RENAME_20261026.md](RENAME_20261026.md)。
+
+## 20261025：继承的训练协议变更
+
 基础：20261022 Clean→PGD-L∞→PGD-L2→Patch 项目。只修改发布副本，原项目不动。
 
 | 内容 | 修改前 | 本发布版 |
@@ -9,10 +17,10 @@
 | FAR 默认 monitor/history | 1000/2000 | 500/500；CLI、函数、缓存类一致 |
 | 四基线顺序 | 依赖模块全局 TASKS，原入口旧顺序 | 使用 cfg.task_sequence，双入口，不修改全局变量 |
 | Joint 双入口 | 单通用入口 | 两种条件前向顺序，训练仍 Clean→Joint |
-| PACE best | epoch>5，即实际第7轮起 | epoch+1>实际 warmup_epochs |
+| DASR best | epoch>5，即实际第7轮起 | epoch+1>实际 warmup_epochs |
 | SSEAT/CRT/四基线/Joint best | 第一轮就可选 | 同一 warmup 判定函数 |
 | SSEAT/CRT 均值 | 排除0% | 所有已见条件计入0%，同时检查无效值 |
-| warmup 中断恢复 | PACE 可能将无 best 状态补成 best | warmup 期不生成或补造 best |
+| warmup 中断恢复 | DASR 可能将无 best 状态补成 best | warmup 期不生成或补造 best |
 | Clean 惰性缓存恢复 | 可能不必要地要求独立 Clean best 文件 | 恒等变换直接复用固定干净面板；其他攻击仍要求保留生成模型 |
 | Joint warmup best 文件 | 原逻辑每轮写 best_snapshot | 尚无 best 时不写 None checkpoint |
 | CRT Lp ALR | eval 模式、缓存 clean reference 等旧实现 | 后续官方 L2Reg 对齐模块 |
@@ -24,7 +32,7 @@
 核心判定：
 
 ```python
-# Before (PACE, zero-based epoch)
+# Before (DASR, zero-based epoch)
 if epoch > 5 and score > best_score:
     ...
 

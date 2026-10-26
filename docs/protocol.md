@@ -3,7 +3,7 @@
 This document describes this source snapshot, not an assertion of full official
 baseline reproduction. 中文与英文 README 中的命令对应本文件列出的实现。
 
-## PACE/DASR
+## DASR
 
 - DTR selects a previous task using its accuracy decrease relative to the preceding
   stage's selected model. The default gate is strictly greater than 1 percentage
@@ -45,12 +45,12 @@ baseline reproduction. 中文与英文 README 中的命令对应本文件列出�
 | EMA | .999, trainable parameters only; current BN buffers retained |
 | Seed / split / evaluation seed | 42 / 42 / 42 |
 | Validation size | Imagenette 1000; other supported datasets 5000 |
-| PACE batch defaults | CIFAR 64, Tiny 16, Imagenette 64 |
+| DASR batch defaults | CIFAR 64, Tiny 16, Imagenette 64 |
 | Other continual trainers' batch defaults | CIFAR 64, Tiny 16, Imagenette 32 |
 | Joint defaults | Imagenette, ResNet-18, batch32; Clean100 + Joint90 |
 
 Explicit batch32 is used throughout the Imagenette README examples. This release
-does not silently replace PACE's previous batch64 default.
+does not silently replace DASR's previous batch64 default.
 
 ## Attacks in pixel space [0,1]
 
@@ -66,9 +66,9 @@ does not silently replace PACE's previous batch64 default.
 
 Patch uses the existing pixel-replacement constraint and sign updates of 0.1.
 These budgets are inherited experimental settings, not dimension-normalized
-equivalent attack strengths. PACE resolves them in `train_replay_comparison.main`;
+equivalent attack strengths. DASR resolves them in `train_DASR.main`;
 shared baselines resolve them in `common.config_from_args`. Four-baseline and
-joint CLIs also expose explicit epsilon/step overrides. The PACE/SSEAT/CRT entries
+joint CLIs also expose explicit epsilon/step overrides. The DASR/SSEAT/CRT entries
 do not expose every such override: inspect `--help`, do not assume flags transfer.
 
 ## Method-specific defaults
@@ -89,7 +89,7 @@ project's variants; GSA is not claimed to reproduce an unidentified upstream pap
 
 ## Checkpoint selection
 
-`pace_aligned/selection.py` defines the mean, warmup length and eligibility for
+`dasr_aligned/selection.py` defines the mean, warmup length and eligibility for
 every trainer. Means include exactly the specified conditions, including zero;
 missing/extra conditions, NaN, infinity and values outside [0,100] are rejected.
 Default eligibility: Clean epoch7+, attack epoch3+; one-epoch diagnostics have
@@ -99,7 +99,7 @@ The **mean formula and time gate are unified, not every validation sample**:
 
 | Trainer | Selection set |
 |---|---|
-| PACE, TRADES, MART, DER++, GSA | full validation for every seen task |
+| DASR, TRADES, MART, DER++, GSA | full validation for every seen task |
 | SSEAT, CRT | current task full validation; historical tasks fixed monitor (500 by default) |
 | Joint | full validation for phase conditions |
 
@@ -109,7 +109,7 @@ silently changed by the request to count zero accuracies.
 
 ## CRT ALR provenance and scope
 
-`pace_aligned/crt_lp_alr.py` is the device-portable later alignment of
+`dasr_aligned/crt_lp_alr.py` is the device-portable later alignment of
 [official L2Reg(var_reg=False)](https://github.com/inspire-group/continual_robust_training/blob/5a6932430219d531aab5736de94292b149ff73ae/train/reg_utils.py),
 pinned to commit `5a6932430219d531aab5736de94292b149ff73ae`.
 It preserves training mode, per-step clean forwards, CPU float32 random starts,
@@ -132,7 +132,7 @@ the exact upstream file (SHA256 enforced). The external repo is not distributed.
 
 Ordinary final-test conditions: Clean, Patch, CW-L2, PGD-L2, PGD-Linf; plus AA-L2
 and AA-Linf. Positive AA subsets are class balanced; full-test mode preserves all
-test examples. PACE/SSEAT/CRT default AA sample count1000; four-baseline and joint
+test examples. DASR/SSEAT/CRT default AA sample count1000; four-baseline and joint
 CLIs default0. All README training examples explicitly request0 for comparability.
 
 Feature caches store actual paired final-test features on CPU. t-SNE defaults:

@@ -1,21 +1,26 @@
-# DASR / PACE: continual adversarial training
+# DASR: continual adversarial training
 
 [中文说明](README_zh.md) · [Protocol and parameters](docs/protocol.md) · [Changes](docs/changes.md) · [GitHub upload guide](docs/github_upload_zh.md)
 
 Research implementation of continual adversarial training with task selection,
 historical-versus-regenerated replay, feature distillation, and comparison baselines.
-The legacy `PACE` module and checkpoint names are retained. This release contains
-PACE/DASR, SSEAT-aligned, CRT-aligned, TRADES, MART, DER++, GSA, and Joint-Mean.
+This release uses DASR module, entry-point and newly generated method names. It contains
+DASR, SSEAT-aligned, CRT-aligned, TRADES, MART, DER++, GSA, and Joint-Mean.
 It contains neither CAD nor the standalone Patch-stage restart utility.
 
 ## Release definition
 
-This release extends the 20261022 four-task project. It changes **all trainers** to
-select the best checkpoint only after their scheduler's warmup, includes zero
-accuracies in selection means, sets FAR monitor/history defaults to **500/500**,
-and integrates the later official-aligned L2/Linf CRT ALR module. It is a new
-training protocol: **start new experiment directories; do not reuse old results
-as results of this release**.
+The 20261026 update renames the validated 20261025 release; it does not change
+training algorithms or hyperparameters. `train_DASR.py` is the main entry;
+`train_DASR_clean_linf_l2_patch.py` fixes the reverse sequence. Import modules
+are `dasr_aligned` and `dasr_components`. See [migration and complete file list](docs/RENAME_20261026.md).
+
+Inherited settings: all trainers select best only after warmup, means include
+zero accuracies, FAR defaults are **500/500**, and CRT uses the aligned L2/Linf ALR.
+Method/run labels and some protocol-version strings change with the name.
+Do not mix old and renamed native resume files or overwrite an active training
+checkout. Finish existing experiments with their original version; use a new
+directory for this release. No checkpoint-identity validation was bypassed.
 
 Historical FAR examples still come from each attack's original selected model
 and persist across stages. Updating the preceding-stage accuracy reference does
@@ -29,11 +34,11 @@ torchvision 0.19.1 pair are the regression target. Choose one setup:
 ```bash
 # NVIDIA / CUDA 12.1 recipe (Linux or Windows)
 conda env create -f environment.yml
-conda activate dasr-pace
+conda activate dasr
 
 # Alternative CPU-only regression environment
 conda env create -f environment-cpu.yml
-conda activate dasr-pace-cpu
+conda activate dasr-cpu
 ```
 
 Alternatively, inside an existing isolated Python environment:
@@ -90,9 +95,9 @@ exist raises an error instead of silently duplicating examples.
 
 | Method | Clean → Patch → L2 → Linf | Clean → Linf → L2 → Patch |
 |---|---|---|
-| PACE/DASR | `train_replay_comparison.py` | `train_pace_clean_linf_l2_patch.py` |
-| SSEAT | `train_sseat_pace_aligned.py` | `train_sseat_clean_linf_l2_patch.py` |
-| CRT | `train_crt_pace_aligned.py` | `train_crt_clean_linf_l2_patch.py` |
+| DASR | `train_DASR.py` | `train_DASR_clean_linf_l2_patch.py` |
+| SSEAT | `train_sseat_dasr_aligned.py` | `train_sseat_clean_linf_l2_patch.py` |
+| CRT | `train_crt_dasr_aligned.py` | `train_crt_clean_linf_l2_patch.py` |
 | TRADES | `train_trades_clean_patch_l2_linf.py` | `train_trades_clean_linf_l2_patch.py` |
 | MART | `train_mart_clean_patch_l2_linf.py` | `train_mart_clean_linf_l2_patch.py` |
 | DER++ | `train_derpp_clean_patch_l2_linf.py` | `train_derpp_clean_linf_l2_patch.py` |
@@ -100,7 +105,7 @@ exist raises an error instead of silently duplicating examples.
 | Joint-Mean | `train_joint_clean_patch_l2_linf.py` | `train_joint_clean_linf_l2_patch.py` |
 
 Original `train_trades.py`, `train_mart.py`, `train_derpp_baseline.py`,
-`train_gsa_baseline.py`, and `train_joint_pace_aligned.py` remain available.
+`train_gsa_baseline.py`, and `train_joint_dasr_aligned.py` remain available.
 For Joint-Mean the two entries specify the order of condition forwards in a
 joint minibatch, **not** sequential attack stages. They retain Clean → Joint.
 
@@ -112,11 +117,11 @@ On PowerShell, omit `CUDA_VISIBLE_DEVICES=0` or set `$env:CUDA_VISIBLE_DEVICES="
 before a single-line Python command. Always give each experiment its own name.
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python train_pace_clean_linf_l2_patch.py \
+CUDA_VISIBLE_DEVICES=0 python train_DASR_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
   --policy dtr --ablation full --replay-source-mode fg_adaptive_lazy \
   --far-monitor-size 500 --far-history-size 500 \
-  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name pace_reverse_s42
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name dasr_reverse_s42
 
 CUDA_VISIBLE_DEVICES=0 python train_sseat_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
@@ -138,7 +143,7 @@ method. TRADES defaults to KL inner attacks; `--trades-inner-loss ce` retains th
 legacy alternative. To run the old order, choose the left-column script. For
 CIFAR-100 + WRN-34-10 use `--dataset cifar100 --backbone wrn --batch-size 64`;
 CIFAR-10 changes only the dataset. Add `--dry-run` to inspect resolved settings
-without loading data. Do not pass PACE-only flags to other trainers.
+without loading data. Do not pass DASR-only flags to other trainers.
 
 ```bash
 python train_joint_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name joint_reverse_s42
@@ -146,7 +151,7 @@ python train_joint_clean_linf_l2_patch.py --dataset imagenette --backbone resnet
 
 ### Replay and ablations
 
-PACE supports `--replay-source-mode historical|regenerated|fg_adaptive|fg_adaptive_lazy`
+DASR supports `--replay-source-mode historical|regenerated|fg_adaptive|fg_adaptive_lazy`
 and `--policy dtr|random|uniform|lowest_accuracy`. Lazy caching creates a training
 cache only on the first historical-replay use, then reuses it. It is not an
 automatic cache-refresh policy.
@@ -169,20 +174,20 @@ shared function. Warmup epochs still train, validate and save resume state.
 
 This does not make every selection dataset identical: SSEAT/CRT retain full
 validation for the current task and the fixed monitor for previous tasks;
-PACE and the four additional baselines use full validation for selection.
+DASR and the four additional baselines use full validation for selection.
 See [protocol details](docs/protocol.md).
 
-- PACE epoch continuation: repeat the exact command with `--resume --resume-mode epoch`.
+- DASR epoch continuation: repeat the exact command with `--resume --resume-mode epoch`.
   Keep the complete run folder: a not-yet-built adversarial replay cache still needs
   its historical `*_selected.pt`. The resume file embeds panels and already-built
   caches, not every historical model. Clean replay itself needs no attack model.
-  Default PACE `--resume` restarts an unfinished task from its preceding boundary.
+  Default DASR `--resume` restarts an unfinished task from its preceding boundary.
 - SSEAT/CRT: repeat the exact entry and options with `--resume`; restart after the
   last completed stage, not an exact interrupted epoch. SSEAT requires its memory file.
 - TRADES/MART/DER++/GSA/Joint: repeat the exact command with `--resume` for epoch resume.
   `--eval-only` requires completed training and the same run identity.
 - Keep new and old orders in separate directories. Old selection/ALR protocols
-  must not be relabeled as this release. PACE's explicit legacy-import utilities
+  must not be relabeled as this release. DASR's explicit legacy-import utilities
   remain for compatibility; any such continuation is a mixed-protocol run.
 - `--autoattack-samples 0` evaluates the full available test set, whatever its size.
   Positive smaller counts use deterministic class-balanced sampling. This is
@@ -209,7 +214,7 @@ true boundary. Distance correctness/error overlays are not decision thresholds.
 
 ```bash
 python -B -m pytest -q tests --prune-test-artifacts -p no:cacheprovider
-python train_replay_comparison.py --smoke --dataset cifar10 --run-name smoke_check
+python train_DASR.py --smoke --dataset cifar10 --run-name smoke_check
 ```
 
 Tests use synthetic data and fake AutoAttack where appropriate; they do not
@@ -220,7 +225,7 @@ GitHub Actions runs the CPU suite; CUDA experiments remain the user's responsibi
 `docs/TEST_REPORT.md` describes this release's local verification.
 
 Run directories contain configs, environment metadata, metrics, checkpoints,
-resource records and final-test results. PACE and the baseline families have
+resource records and final-test results. DASR and the baseline families have
 different checkpoint filenames; do not rename files to force compatibility.
 `export_run_artifacts.py`, `summarize_ablations.py`, and `summarize_replay_study.py`
 provide export helpers. Data, runtime caches, private logs, and weights are excluded

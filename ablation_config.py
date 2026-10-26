@@ -3,7 +3,7 @@ from dataclasses import asdict, dataclass
 
 ABLATIONS = ('full', 'only_cls', 'no_distillation', 'no_contrast',
              'fixed_weights', 'no_queue', 'fixed_temperature', 'no_dtr')
-LABELS = {'full': 'PACE', 'only_cls': 'Only L_cls', 'no_distillation': 'No distillation',
+LABELS = {'full': 'DASR', 'only_cls': 'Only L_cls', 'no_distillation': 'No distillation',
           'no_contrast': 'No contrast term', 'fixed_weights': 'Fixed weights',
           'no_queue': 'No queue', 'fixed_temperature': 'Fixed temperature', 'no_dtr': 'No DTR'}
 
@@ -55,12 +55,12 @@ class AblationConfig:
             'adaptive_temperature', 'gradient_weighting', 'replay')}}
 
 def method_name(policy, ablation='full'):
-    return f'pace_{policy}' + ('' if ablation == 'full' else f'_{ablation}')
+    return f'dasr_{policy}' + ('' if ablation == 'full' else f'_{ablation}')
 
 def make_criterion(ablation, task):
     if task == 'clean' or ablation.feature_loss == 'none':
         return None
-    from pace_components import PureFeatureDistillationLoss, AdaptiveDecoupledLACDLoss, DecoupledLACDLoss
+    from dasr_components import PureFeatureDistillationLoss, AdaptiveDecoupledLACDLoss, DecoupledLACDLoss
     if ablation.feature_loss == 'cosine':
         return PureFeatureDistillationLoss()
     if ablation.adaptive_temperature:

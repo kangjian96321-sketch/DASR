@@ -16,7 +16,7 @@ def main():
     p.add_argument('--seeds', type=int, nargs='+', default=[42, 43, 44])
     p.add_argument('--data-root', default='./data')
     p.add_argument('--output-root', default='./runs_replay')
-    p.add_argument('--run-name', default='pace_v3')
+    p.add_argument('--run-name', default='dasr_v3')
     p.add_argument('--ablation', choices=ABLATIONS, default='full')
     p.add_argument('--replay-source-mode', choices=SOURCE_MODES, default='fg_adaptive_lazy')
     p.add_argument('--resume-mode', choices=['task','epoch'], default='task')
@@ -33,7 +33,7 @@ def main():
         p.error('This preset has no replay. Use run_ablations.py for ablation studies.')
     if len(set(args.seeds)) != len(args.seeds):
         p.error('Each training seed must appear exactly once')
-    entry = Path(__file__).with_name('train_replay_comparison.py')
+    entry = Path(__file__).with_name('train_DASR.py')
     output = Path(args.output_root).resolve()
     for seed in args.seeds:
         anchor_method = f'{method_name("dtr", args.ablation)}_{args.replay_source_mode}'

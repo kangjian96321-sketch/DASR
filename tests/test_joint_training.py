@@ -9,8 +9,8 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pace_aligned import joint
-from pace_aligned.common import DataBundle, EMA, ExperimentConfig, make_backbone
+from dasr_aligned import joint
+from dasr_aligned.common import DataBundle, EMA, ExperimentConfig, make_backbone
 
 
 @pytest.fixture(autouse=True)
@@ -291,7 +291,7 @@ def test_feature_collection_reuses_real_evaluation_features(tmp_path, monkeypatc
     cfg.plot_final_features = True
     cfg.max_eval_batches = None
     rendered = []
-    from pace_aligned.feature_plots import FeatureStore
+    from dasr_aligned.feature_plots import FeatureStore
     monkeypatch.setattr(FeatureStore, "render", lambda self, cfg: rendered.append(tuple(self.methods)))
     model, data = TinyModel().eval(), bundle()
     expected = joint.final_test(model, data, cfg, torch.device("cpu"), "sig")

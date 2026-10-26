@@ -19,7 +19,7 @@ def build_commands(args, extra):
     if any(x.split('=')[0] in forbidden for x in extra):
         raise ValueError('Use this launcher options for run identity and checkpoint sources')
     mapping = json.loads(args.checkpoint_map.read_text(encoding='utf-8')) if args.checkpoint_map else {}
-    entry = Path(__file__).with_name('train_replay_comparison.py')
+    entry = Path(__file__).with_name('train_DASR.py')
     # Keep programmatic callers of the pre-FAR launcher working.
     replay_source_mode = getattr(args, 'replay_source_mode', 'fg_adaptive_lazy')
     backbone = getattr(args, 'backbone', 'wrn')
@@ -66,7 +66,7 @@ def main(argv=None):
     p.add_argument('--dataset', default='cifar100')
     p.add_argument('--data-root', default='./data')
     p.add_argument('--output-root', default='./runs_replay')
-    p.add_argument('--run-name', default='pace_v3')
+    p.add_argument('--run-name', default='dasr_v3')
     p.add_argument('--checkpoint-map', type=Path)
     p.add_argument('--resume', action='store_true')
     p.add_argument('--dry-run', action='store_true')

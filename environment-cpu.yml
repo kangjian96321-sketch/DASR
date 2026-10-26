@@ -1,4 +1,4 @@
-name: dasr-pace-cpu
+name: dasr-cpu
 channels:
   - pytorch
   - conda-forge

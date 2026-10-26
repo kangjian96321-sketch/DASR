@@ -1,10 +1,10 @@
 """Small fixed-order launchers; all optimization stays in native runners."""
 import sys
-from pace_aligned.selection import OLD_SEQUENCE, NEW_SEQUENCE
+from dasr_aligned.selection import OLD_SEQUENCE, NEW_SEQUENCE
 
 
 def baseline_entry(method, sequence=NEW_SEQUENCE, argv=None):
-    from pace_aligned.continual_baselines import main
+    from dasr_aligned.continual_baselines import main
     args = list(sys.argv[1:] if argv is None else argv)
     reject(args, "--task-sequence")
     tag = "clean_linf_l2_patch" if sequence == NEW_SEQUENCE else "clean_patch_l2_linf"
@@ -13,7 +13,7 @@ def baseline_entry(method, sequence=NEW_SEQUENCE, argv=None):
 
 
 def joint_entry(sequence=NEW_SEQUENCE, argv=None):
-    from pace_aligned.joint import main
+    from dasr_aligned.joint import main
     args = list(sys.argv[1:] if argv is None else argv)
     reject(args, "--joint-attacks")
     reject(args, "--task-sequence")

@@ -1,11 +1,11 @@
 # Provenance and third-party components
 
-This release is assembled from the supplied PACE research project and its later
+This release is assembled from the supplied DASR research project and its later
 CRT Lp ALR alignment. It does not grant a new repository-wide license.
 
 - CRT algorithm reference: [inspire-group/continual_robust_training](https://github.com/inspire-group/continual_robust_training),
   commit `5a6932430219d531aab5736de94292b149ff73ae`, `train/reg_utils.py:L2Reg`.
-  `pace_aligned/crt_lp_alr.py` is a local device-portable adaptation of that algorithm.
+  `dasr_aligned/crt_lp_alr.py` is a local device-portable adaptation of that algorithm.
   The parity checker reads an external trusted reference with SHA256
   `87ba0a7f348ab802f03fd31156abc860a0809147bb9b1fc0dc1bbd56db9a937d`.
   No full upstream checkout is bundled. A redistribution license for that exact

@@ -9,11 +9,11 @@ import pytest
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import train_replay_comparison as training
+import train_DASR as training
 import checkpoint_compat as compat
 from ablation_config import ABLATIONS, AblationConfig, make_criterion, method_name
-from pace_components import PureFeatureDistillationLoss
-from pace_aligned.common import ExperimentConfig
+from dasr_components import PureFeatureDistillationLoss
+from dasr_aligned.common import ExperimentConfig
 from summarize_ablations import collect, aggregate
 
 
@@ -176,7 +176,7 @@ def test_final_evaluation_cache_survives_json_repair(tmp_path, finished, monkeyp
     shutil.copytree(finished.run_dir,cfg.run_dir)
     cfg.resume = True
     cfg.final_test_methods = ('clean','autoattack_l2','autoattack')
-    import pace_aligned.common as common
+    import dasr_aligned.common as common
     calls = []
     def aa(model,loader,norm,*args):
         calls.append(norm)

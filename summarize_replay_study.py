@@ -111,7 +111,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--output-root', type=Path, default=Path('./runs_replay'))
     p.add_argument('--dataset', default='cifar100')
-    p.add_argument('--run-name', default='pace_v3')
+    p.add_argument('--run-name', default='dasr_v3')
     p.add_argument('--ablation', choices=ABLATIONS, default='full')
     p.add_argument('--seeds', type=int, nargs='+', default=[42, 43, 44])
     args = p.parse_args()

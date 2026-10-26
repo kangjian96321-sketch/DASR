@@ -10,12 +10,12 @@ import pytest
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pace_aligned import common, continual_baselines, joint, crt, sseat
-from pace_aligned.selection import (OLD_SEQUENCE, NEW_SEQUENCE, SELECTION_POLICY,
+from dasr_aligned import common, continual_baselines, joint, crt, sseat
+from dasr_aligned.selection import (OLD_SEQUENCE, NEW_SEQUENCE, SELECTION_POLICY,
                                     warmup_epochs, best_eligible, selection_mean)
-from pace_aligned.crt_lp_alr import official_lp_alr, generate_lp_alr_view
+from dasr_aligned.crt_lp_alr import official_lp_alr, generate_lp_alr_view
 from check_crt_lp_alr import ProbeModel, ZeroInputGradient
-import train_replay_comparison as pace
+import train_DASR as dasr
 
 
 @pytest.mark.parametrize('epochs,warmup,first', [(100,6,7),(30,2,3),(3,1,2),(2,1,2),(1,0,1)])
@@ -60,11 +60,11 @@ def test_joint_orders_are_conditions_not_stages(tag, sequence, capsys):
 
 
 def test_far_defaults_and_no_removed_baseline():
-    args = pace.parse_args([])
+    args = dasr.parse_args([])
     assert args.far_monitor_size == args.far_history_size == 500
     root = Path(__file__).resolve().parents[1]
     assert not (root/'tools'/'restart_patch.py').exists()
-    cfg = common.ExperimentConfig(method='pace')
+    cfg = common.ExperimentConfig(method='dasr')
     assert not any(k.startswith('cad_') for k in vars(cfg))
 
 
@@ -99,25 +99,25 @@ def test_l2_zero_gradient_fallback():
     assert (view-x).flatten(1).norm(dim=1).max() <= cfg.l2_eps + 1e-6
 
 
-def test_pace_epoch_resume_does_not_select_warmup_checkpoint(tmp_path, monkeypatch):
+def test_dasr_epoch_resume_does_not_select_warmup_checkpoint(tmp_path, monkeypatch):
     torch.set_num_threads(1)
-    cfg = common.ExperimentConfig(method='pace_uniform', dataset='cifar10', device='cpu', workers=0,
+    cfg = common.ExperimentConfig(method='dasr_uniform', dataset='cifar10', device='cpu', workers=0,
         output_root=str(tmp_path), run_name='warmup_resume', depth=10, widen_factor=1,
         batch_size=4, task_sequence=('clean',), task_epochs={'clean':3},
         max_train_batches=1, max_eval_batches=1, final_test_methods=('clean',))
-    save = pace.atomic_checkpoint
+    save = dasr.atomic_checkpoint
     def interrupt(path, payload):
         save(path, payload)
         if Path(path).name == 'stage0_clean_resume.pt' and payload['epoch'] == 0:
             assert payload['best_snapshot'] is None
             raise RuntimeError('stop in warmup')
-    monkeypatch.setattr(pace,'atomic_checkpoint',interrupt)
+    monkeypatch.setattr(dasr,'atomic_checkpoint',interrupt)
     with pytest.raises(RuntimeError,match='stop in warmup'):
-        pace.run_experiment(cfg, policy='uniform', smoke=True)
+        dasr.run_experiment(cfg, policy='uniform', smoke=True)
     assert not (cfg.run_dir/'stage0_clean_selected.pt').exists()
-    monkeypatch.setattr(pace,'atomic_checkpoint',save)
+    monkeypatch.setattr(dasr,'atomic_checkpoint',save)
     cfg.resume = True
-    pace.run_experiment(cfg, policy='uniform', smoke=True, resume_mode='epoch')
+    dasr.run_experiment(cfg, policy='uniform', smoke=True, resume_mode='epoch')
     selected = torch.load(cfg.run_dir/'stage0_clean_selected.pt',weights_only=False)
     assert selected['epoch'] >= 1
 

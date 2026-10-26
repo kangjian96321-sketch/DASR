@@ -1,5 +1,5 @@
 # Linux/Windows NVIDIA training recipe. Not a lockfile or a GPU validation claim.
-name: dasr-pace
+name: dasr
 channels:
   - pytorch
   - nvidia

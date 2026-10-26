@@ -8,15 +8,15 @@ import torch.nn.functional as F
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import far_replay
-import train_replay_comparison as training
+import train_DASR as training
 from far_replay import SOURCE_MODES, choose_source, decompose
-from pace_aligned.common import ExperimentConfig, class_balanced_indices
-from pace_components import AdaptiveDecoupledLACDLoss
+from dasr_aligned.common import ExperimentConfig, class_balanced_indices
+from dasr_components import AdaptiveDecoupledLACDLoss
 
 
 def tiny_config(output: Path, mode: str) -> ExperimentConfig:
     return ExperimentConfig(
-        method=f"pace_uniform_{mode}",
+        method=f"dasr_uniform_{mode}",
         dataset="cifar10",
         output_root=str(output),
         run_name="four_sources",

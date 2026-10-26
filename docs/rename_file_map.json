@@ -1,0 +1,189 @@
+{
+  "remove_old_paths": [
+    "pace_aligned/__init__.py",
+    "pace_aligned/baseline_losses.py",
+    "pace_aligned/baseline_memory.py",
+    "pace_aligned/common.py",
+    "pace_aligned/continual_baselines.py",
+    "pace_aligned/crt.py",
+    "pace_aligned/crt_lp_alr.py",
+    "pace_aligned/feature_plots.py",
+    "pace_aligned/joint.py",
+    "pace_aligned/selection.py",
+    "pace_aligned/sseat.py",
+    "pace_components.py",
+    "train_crt_pace_aligned.py",
+    "train_joint_pace_aligned.py",
+    "train_pace_clean_linf_l2_patch.py",
+    "train_replay_comparison.py",
+    "train_sseat_pace_aligned.py"
+  ],
+  "add_new_paths": [
+    "dasr_aligned/__init__.py",
+    "dasr_aligned/baseline_losses.py",
+    "dasr_aligned/baseline_memory.py",
+    "dasr_aligned/common.py",
+    "dasr_aligned/continual_baselines.py",
+    "dasr_aligned/crt.py",
+    "dasr_aligned/crt_lp_alr.py",
+    "dasr_aligned/feature_plots.py",
+    "dasr_aligned/joint.py",
+    "dasr_aligned/selection.py",
+    "dasr_aligned/sseat.py",
+    "dasr_components.py",
+    "docs/RENAME_20261026.md",
+    "docs/rename_file_map.json",
+    "docs/rename_parity.json",
+    "tests/test_dasr_naming.py",
+    "train_DASR.py",
+    "train_DASR_clean_linf_l2_patch.py",
+    "train_crt_dasr_aligned.py",
+    "train_joint_dasr_aligned.py",
+    "train_sseat_dasr_aligned.py"
+  ],
+  "replace_same_paths": [
+    "README.md",
+    "README_zh.md",
+    "THIRD_PARTY_NOTICES.md",
+    "ablation_config.py",
+    "check_crt_lp_alr.py",
+    "docs/TEST_REPORT.md",
+    "docs/changes.md",
+    "docs/github_upload_zh.md",
+    "docs/protocol.md",
+    "docs/release_manifest.json",
+    "environment-cpu.yml",
+    "environment.yml",
+    "far_replay.py",
+    "my_functions/resnet_base.py",
+    "plot_final_features.py",
+    "run_ablations.py",
+    "run_far_source_modes.py",
+    "run_replay_study.py",
+    "sequence_entries.py",
+    "summarize_replay_study.py",
+    "tests/test_ablations_and_import.py",
+    "tests/test_autoattack_balanced.py",
+    "tests/test_autoattack_memory.py",
+    "tests/test_backbones.py",
+    "tests/test_baseline_completion.py",
+    "tests/test_clean_linf_l2_patch.py",
+    "tests/test_far_replay_sources.py",
+    "tests/test_final_feature_plots.py",
+    "tests/test_four_baselines.py",
+    "tests/test_joint_training.py",
+    "tests/test_release_protocol.py",
+    "tests/test_replay.py",
+    "tests/test_sseat_crt_new_sequence.py",
+    "tests/test_trainer_resume.py",
+    "train_crt_clean_linf_l2_patch.py",
+    "train_derpp_baseline.py",
+    "train_derpp_clean_linf_l2_patch.py",
+    "train_derpp_clean_patch_l2_linf.py",
+    "train_gsa_baseline.py",
+    "train_gsa_clean_linf_l2_patch.py",
+    "train_gsa_clean_patch_l2_linf.py",
+    "train_joint_clean_linf_l2_patch.py",
+    "train_joint_clean_patch_l2_linf.py",
+    "train_mart.py",
+    "train_mart_clean_linf_l2_patch.py",
+    "train_mart_clean_patch_l2_linf.py",
+    "train_sseat_clean_linf_l2_patch.py",
+    "train_trades.py",
+    "train_trades_clean_linf_l2_patch.py",
+    "train_trades_clean_patch_l2_linf.py"
+  ],
+  "unchanged_paths": [
+    ".gitattributes",
+    ".github/workflows/tests.yml",
+    ".gitignore",
+    "checkpoint_compat.py",
+    "docs/crt_alr_parity.json",
+    "docs/test_environment.json",
+    "examples/checkpoint_map.json",
+    "export_run_artifacts.py",
+    "my_functions/__init__.py",
+    "my_functions/adversary_tools.py",
+    "my_functions/backbone_options.py",
+    "my_functions/shared_base.py",
+    "replay_policies.py",
+    "requirements-autoattack.txt",
+    "requirements-dev.txt",
+    "requirements.txt",
+    "sequence_clean_linf_l2_patch.py",
+    "summarize_ablations.py",
+    "tests/conftest.py"
+  ],
+  "renamed_paths": [
+    {
+      "old": "pace_aligned/__init__.py",
+      "new": "dasr_aligned/__init__.py"
+    },
+    {
+      "old": "pace_aligned/baseline_losses.py",
+      "new": "dasr_aligned/baseline_losses.py"
+    },
+    {
+      "old": "pace_aligned/baseline_memory.py",
+      "new": "dasr_aligned/baseline_memory.py"
+    },
+    {
+      "old": "pace_aligned/common.py",
+      "new": "dasr_aligned/common.py"
+    },
+    {
+      "old": "pace_aligned/continual_baselines.py",
+      "new": "dasr_aligned/continual_baselines.py"
+    },
+    {
+      "old": "pace_aligned/crt.py",
+      "new": "dasr_aligned/crt.py"
+    },
+    {
+      "old": "pace_aligned/crt_lp_alr.py",
+      "new": "dasr_aligned/crt_lp_alr.py"
+    },
+    {
+      "old": "pace_aligned/feature_plots.py",
+      "new": "dasr_aligned/feature_plots.py"
+    },
+    {
+      "old": "pace_aligned/joint.py",
+      "new": "dasr_aligned/joint.py"
+    },
+    {
+      "old": "pace_aligned/selection.py",
+      "new": "dasr_aligned/selection.py"
+    },
+    {
+      "old": "pace_aligned/sseat.py",
+      "new": "dasr_aligned/sseat.py"
+    },
+    {
+      "old": "pace_components.py",
+      "new": "dasr_components.py"
+    },
+    {
+      "old": "train_crt_pace_aligned.py",
+      "new": "train_crt_dasr_aligned.py"
+    },
+    {
+      "old": "train_joint_pace_aligned.py",
+      "new": "train_joint_dasr_aligned.py"
+    },
+    {
+      "old": "train_pace_clean_linf_l2_patch.py",
+      "new": "train_DASR_clean_linf_l2_patch.py"
+    },
+    {
+      "old": "train_replay_comparison.py",
+      "new": "train_DASR.py"
+    },
+    {
+      "old": "train_sseat_pace_aligned.py",
+      "new": "train_sseat_dasr_aligned.py"
+    }
+  ],
+  "source_zip_sha256": "bff09925c2071cf53e92af294e3e4b25a2db6d58f6ed734d9b44461a2f6e269a",
+  "note": "Metadata files are regenerated; remove paths apply only to the repository source, never experiment runs."
+}

@@ -9,7 +9,7 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pace_aligned import common, crt, sseat
+from dasr_aligned import common, crt, sseat
 import train_crt_clean_linf_l2_patch as crt_entry
 import train_sseat_clean_linf_l2_patch as sseat_entry
 from sequence_clean_linf_l2_patch import TASK_SEQUENCE, validate_resume_sequence
@@ -62,10 +62,10 @@ def test_dry_run_never_trains_or_checks_resume(method, monkeypatch, capsys):
 
 
 def test_original_entries_and_global_task_defaults_unchanged():
-    import train_crt_pace_aligned
-    import train_sseat_pace_aligned
-    assert train_crt_pace_aligned.main is crt.main
-    assert train_sseat_pace_aligned.main is sseat.main
+    import train_crt_dasr_aligned
+    import train_sseat_dasr_aligned
+    assert train_crt_dasr_aligned.main is crt.main
+    assert train_sseat_dasr_aligned.main is sseat.main
     assert common.TASKS == OLD
 
 

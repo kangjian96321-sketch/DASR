@@ -8,14 +8,14 @@ import pytest
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import train_replay_comparison as training
+import train_DASR as training
 import far_replay
-from pace_aligned.common import ExperimentConfig
+from dasr_aligned.common import ExperimentConfig
 from summarize_replay_study import aggregate_resources
 
 
 def config(output):
-    cfg = ExperimentConfig(method='pace_uniform', dataset='cifar10',
+    cfg = ExperimentConfig(method='dasr_uniform', dataset='cifar10',
         output_root=str(output), run_name='resume_integration', device='cpu',
         depth=10, widen_factor=1, batch_size=4, workers=0,
         task_sequence=('clean', 'patch', 'pgd_l2'),
@@ -103,7 +103,7 @@ def test_reference_resets_to_previous_stage_best(tmp_path, monkeypatch):
     """DTR and F/G share a reference fixed at the preceding task boundary."""
     torch.set_num_threads(2)
     cfg = config(tmp_path)
-    cfg.method = 'pace_dtr'
+    cfg.method = 'dasr_dtr'
     current = {'stage': 0}
     real_train = training.train_epoch
 

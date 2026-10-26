@@ -1,10 +1,12 @@
-# DASR / PACE 持续对抗训练代码
+# DASR 持续对抗训练代码
 
 [English](README.md)｜[技术与参数](docs/protocol.md)｜[修改前后对比](docs/changes.md)｜[GitHub 上传操作](docs/github_upload_zh.md)
 
-本合集以 20261022 四任务项目为基础，包含 PACE/DASR、SSEAT-aligned、
+本合集是 20261025 已验证发布版的 20261026 纯命名更新，包含 DASR、SSEAT-aligned、
 CRT-aligned、TRADES、MART、DER++、GSA 和联合训练，以及最终特征可视化。
-保留原有 PACE 文件名与模块名，避免破坏导入关系。
+主入口统一为 `train_DASR.py`，逆序入口为 `train_DASR_clean_linf_l2_patch.py`，
+模块统一为 `dasr_aligned` 和 `dasr_components`；导入、批量启动器和测试同步更新。
+本次不改变训练算法、参数和默认攻击顺序。见[更名与文件替换清单](docs/RENAME_20261026.md)。
 **不含 CAD，也不含独立的 Patch 阶段重训工具。**
 
 ## 本版已经统一的内容
@@ -18,7 +20,9 @@ CRT-aligned、TRADES、MART、DER++、GSA 和联合训练，以及最终特征�
 
 **没有改动的内容：**数据划分、原攻击预算、损失主体、DTR/F/G 路由、缓存跨阶段保留、
 原对比方法的重放机制。没有合入“每阶段刷新 FAR 历史样本”的分支。
-新版本会改变选中模型和后续训练起点，应新建实验目录重新训练，不能仅替换代码后沿用旧结果。
+上面列出的 warm-up/计入0%等调整已经包含在 20261025 版，本次没有再次改动。
+本次方法标签、默认运行名和部分协议版本字符串随名称更新，旧原生断点可能因身份检查被拒绝。
+不要通过修改签名或强行改日志继续训练；正在运行的实验保留原目录，命名版放新目录。
 
 ## 1. 安装环境
 
@@ -27,11 +31,11 @@ CRT-aligned、TRADES、MART、DER++、GSA 和联合训练，以及最终特征�
 ```bash
 # NVIDIA GPU 环境：CUDA 12.1 依赖配方
 conda env create -f environment.yml
-conda activate dasr-pace
+conda activate dasr
 
 # 或者 CPU 测试环境
 conda env create -f environment-cpu.yml
-conda activate dasr-pace-cpu
+conda activate dasr-cpu
 ```
 
 已有独立 Python 环境也可使用：
@@ -75,9 +79,9 @@ Tiny-ImageNet 支持原 `val_annotations.txt`，也支持已经按类别整理�
 
 | 方法 | 旧顺序：Clean→Patch→L2→L∞ | 新顺序：Clean→L∞→L2→Patch |
 |---|---|---|
-| PACE/DASR | `train_replay_comparison.py` | `train_pace_clean_linf_l2_patch.py` |
-| SSEAT | `train_sseat_pace_aligned.py` | `train_sseat_clean_linf_l2_patch.py` |
-| CRT | `train_crt_pace_aligned.py` | `train_crt_clean_linf_l2_patch.py` |
+| DASR | `train_DASR.py` | `train_DASR_clean_linf_l2_patch.py` |
+| SSEAT | `train_sseat_dasr_aligned.py` | `train_sseat_clean_linf_l2_patch.py` |
+| CRT | `train_crt_dasr_aligned.py` | `train_crt_clean_linf_l2_patch.py` |
 | TRADES | `train_trades_clean_patch_l2_linf.py` | `train_trades_clean_linf_l2_patch.py` |
 | MART | `train_mart_clean_patch_l2_linf.py` | `train_mart_clean_linf_l2_patch.py` |
 | DER++ | `train_derpp_clean_patch_l2_linf.py` | `train_derpp_clean_linf_l2_patch.py` |
@@ -85,7 +89,7 @@ Tiny-ImageNet 支持原 `val_annotations.txt`，也支持已经按类别整理�
 | 联合训练 | `train_joint_clean_patch_l2_linf.py` | `train_joint_clean_linf_l2_patch.py` |
 
 原 `train_trades.py`、`train_mart.py`、`train_derpp_baseline.py`、`train_gsa_baseline.py`
-和 `train_joint_pace_aligned.py` 仍保留。固定顺序入口不允许再覆盖其顺序。
+和 `train_joint_dasr_aligned.py` 仍保留。固定顺序入口不允许再覆盖其顺序。
 **联合训练的双入口仅指定同一 minibatch 内条件前向的排列；它仍然是 Clean→Joint，
 不是三阶段持续训练。**改变排列可能影响共享 BN 的更新顺序，但不改变均值目标定义。
 
@@ -95,11 +99,11 @@ Tiny-ImageNet 支持原 `val_annotations.txt`，也支持已经按类别整理�
 依次运行；`CUDA_VISIBLE_DEVICES` 可按实际 GPU 编号调整。
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python train_pace_clean_linf_l2_patch.py \
+CUDA_VISIBLE_DEVICES=0 python train_DASR_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
   --policy dtr --ablation full --replay-source-mode fg_adaptive_lazy \
   --far-monitor-size 500 --far-history-size 500 \
-  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name pace_reverse_s42
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name dasr_reverse_s42
 
 CUDA_VISIBLE_DEVICES=0 python train_sseat_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
@@ -124,8 +128,8 @@ Windows PowerShell 不支持开头的 Linux 环境变量语法；先执行
 `$env:CUDA_VISIBLE_DEVICES="0"`，再运行单行 `python ...` 命令。
 
 所有正式命令均可先加 `--dry-run` 查看配置；不能只改 run-name 就认为顺序已改变。
-PACE 的 Imagenette 默认 batch 仍为 64，其他入口通常为 32，所以这里显式指定 32。
-不要向 SSEAT/CRT 传 PACE 专有的 `--ablation`、`--far-*`、`--clean-epochs` 等参数。
+DASR 的 Imagenette 默认 batch 仍为 64，其他入口通常为 32，所以这里显式指定 32。
+不要向 SSEAT/CRT 传 DASR 专有的 `--ablation`、`--far-*`、`--clean-epochs` 等参数。
 
 ## 5. 重放选项与消融
 
@@ -153,17 +157,17 @@ warm-up 期间仍进行训练、验证及断点保存，但不把这些模型当
 单轮诊断训练没有 warm-up，可选择唯一一轮；正式默认日程不受该边界处理影响。
 
 所有方法计入 0%，但本次没有把验证样本范围也统一：SSEAT/CRT 仍然当前任务全验证、
-历史任务固定子集选模；PACE 和四个额外基线使用完整验证集。详见 `docs/protocol.md`。
+历史任务固定子集选模；DASR 和四个额外基线使用完整验证集。详见 `docs/protocol.md`。
 
-- PACE 精确到 epoch 续训：原完整命令追加 `--resume --resume-mode epoch`。
+- DASR 精确到 epoch 续训：原完整命令追加 `--resume --resume-mode epoch`。
   请保留完整运行目录：尚未生成的历史攻击缓存仍需要对应的 `*_selected.pt`。
   resume 文件包含监测面板和已生成缓存，不包含所有历史模型；Clean 重放本身不依赖攻击模型。
-- PACE 默认仅 `--resume`：最新未完成任务从阶段起点重新训练。
+- DASR 默认仅 `--resume`：最新未完成任务从阶段起点重新训练。
 - SSEAT/CRT：同入口、同设置追加 `--resume`，从上一个已完成阶段继续；不是精确到 epoch。
   SSEAT 必须保留 `adr_memory.pt`，不能只复制权重。
 - TRADES/MART/DER++/GSA/Joint：追加 `--resume` 恢复最近完整 epoch；训练结束后可 `--eval-only`。
 - 新旧序列、不同 batch、不同选模协议、不同 CRT ALR 配置不能在同一目录强行续训。
-- PACE 保留显式旧 checkpoint 导入能力，但这类继续训练需标记为混合协议，不能作为本版从头训练结果。
+- DASR 保留显式旧 checkpoint 导入能力，但这类继续训练需标记为混合协议，不能作为本版从头训练结果。
 
 `--autoattack-samples 0` 表示完整测试集，不固定为 10,000 张；具体数量取决于数据集。
 正数且小于测试集时采用类别均衡子集。`--autoattack-batch-size` 只影响 AA 的计算批量。
@@ -192,7 +196,7 @@ python plot_final_features.py --run-dir ./runs/你的实验目录 --tsne-samples
 
 ```bash
 python -B -m pytest -q tests --prune-test-artifacts -p no:cacheprovider
-python train_replay_comparison.py --smoke --dataset cifar10 --run-name smoke_check
+python train_DASR.py --smoke --dataset cifar10 --run-name smoke_check
 ```
 
 三项完整 ResNet 多阶段 checkpoint 测试需要至少 2 GiB 临时磁盘空间，不足会明确跳过。

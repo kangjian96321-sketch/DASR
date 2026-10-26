@@ -12,12 +12,12 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pace_aligned import common, crt, sseat, feature_plots
+from dasr_aligned import common, crt, sseat, feature_plots
 from my_functions.shared_base import UnifiedWideResNet, CIFAR10_MEAN, CIFAR10_STD
 from my_functions.backbone_options import backbone_spec
 from my_functions.resnet_base import UnifiedResNet18
 import checkpoint_compat
-import train_replay_comparison as pace
+import train_DASR as dasr
 
 
 @pytest.fixture(autouse=True)
@@ -31,28 +31,28 @@ def single_cpu_thread():
 @pytest.mark.parametrize("method", ["sseat", "crt"])
 @pytest.mark.parametrize("argument", ["resnet18", "resnet-18", "wrn", "wrn-34-10"])
 def test_shared_cli_selection(method, argument):
-    module = importlib.import_module("pace_aligned." + method)
+    module = importlib.import_module("dasr_aligned." + method)
     args = module.build_parser().parse_args(["--dataset", "imagenette", "--backbone", argument])
     cfg = common.config_from_args(method, args)
     assert cfg.backbone == ("resnet18" if argument.startswith("resnet") else "wrn")
     assert cfg.autoattack_samples == 1000 and cfg.image_size == 160
 
 
-def test_pace_cli_default_alias_and_invalid_choice(monkeypatch):
+def test_dasr_cli_default_alias_and_invalid_choice(monkeypatch):
     captured = []
-    monkeypatch.setattr(pace, "run_experiment", lambda cfg, *a, **kw: captured.append(cfg))
-    pace.main([])
-    pace.main(["--backbone", "resnet-18"])
+    monkeypatch.setattr(dasr, "run_experiment", lambda cfg, *a, **kw: captured.append(cfg))
+    dasr.main([])
+    dasr.main(["--backbone", "resnet-18"])
     assert captured[0].backbone == "wrn" and (captured[0].depth, captured[0].widen_factor) == (34, 10)
     assert captured[1].backbone == "resnet18"
     with pytest.raises(SystemExit):
-        pace.parse_args(["--backbone", "resnet50"])
+        dasr.parse_args(["--backbone", "resnet50"])
 
 
 def test_legacy_wrn_weights_forward_rng_unchanged_and_protocol_versioned():
-    cfg = common.ExperimentConfig(method="pace", dataset="cifar10")
+    cfg = common.ExperimentConfig(method="dasr", dataset="cifar10")
     # Selection/defaults changed intentionally; old runs must not match.
-    assert pace.digest(pace.protocol_settings(cfg, True, 1., False)) != (
+    assert dasr.digest(dasr.protocol_settings(cfg, True, 1., False)) != (
         "4ab213e893b3ffcbbffd86ecf746fac1b33fd0c187acc8ea9d7cc7154ac465d9")
     cfg.depth, cfg.widen_factor = 10, 1
     torch.manual_seed(71)
@@ -67,12 +67,12 @@ def test_legacy_wrn_weights_forward_rng_unchanged_and_protocol_versioned():
     with torch.no_grad():
         x = torch.rand(2, 3, 32, 32)
         assert torch.equal(actual(x), expected(x))
-    assert cfg.run_dir.name == "pace_cifar10_seed42_three_seed_resources"
+    assert cfg.run_dir.name == "dasr_cifar10_seed42_three_seed_resources"
 
 
 @pytest.mark.parametrize("dataset", ["cifar10", "cifar100", "tiny_imagenet", "imagenette"])
 def test_resnet_shapes_stem_normalization_and_input_gradients(dataset):
-    cfg = common.ExperimentConfig(method="pace", dataset=dataset, backbone="resnet18")
+    cfg = common.ExperimentConfig(method="dasr", dataset=dataset, backbone="resnet18")
     model = common.make_backbone(cfg).eval()
     assert isinstance(model, UnifiedResNet18)
     small = dataset.startswith("cifar")
@@ -97,7 +97,7 @@ def test_resnet_shapes_stem_normalization_and_input_gradients(dataset):
 def test_standard_imagenette_resnet_matches_torchvision_exactly():
     from torchvision.models import resnet18
     torch.manual_seed(73)
-    cfg = common.ExperimentConfig(method="pace", dataset="imagenette", backbone="resnet18")
+    cfg = common.ExperimentConfig(method="dasr", dataset="imagenette", backbone="resnet18")
     wrapped = common.make_backbone(cfg).eval()
     torch.manual_seed(73)
     reference = resnet18(weights=None, num_classes=10).eval()
@@ -107,14 +107,14 @@ def test_standard_imagenette_resnet_matches_torchvision_exactly():
 
 
 def test_backbone_identity_paths_metadata_and_checkpoint_rejection(tmp_path):
-    wrn = common.ExperimentConfig(method="pace", dataset="cifar10", output_root=str(tmp_path), depth=10, widen_factor=1)
+    wrn = common.ExperimentConfig(method="dasr", dataset="cifar10", output_root=str(tmp_path), depth=10, widen_factor=1)
     resnet = copy.deepcopy(wrn)
     resnet.backbone = "resnet18"
     assert resnet.run_dir != wrn.run_dir and "_resnet18_" in resnet.run_dir.name
-    assert pace.protocol_settings(wrn, True, 1., False) != pace.protocol_settings(resnet, True, 1., False)
-    protocol = pace.protocol_settings(resnet, True, 1., False)
+    assert dasr.protocol_settings(wrn, True, 1., False) != dasr.protocol_settings(resnet, True, 1., False)
+    protocol = dasr.protocol_settings(resnet, True, 1., False)
     resnet.depth, resnet.widen_factor, resnet.dropout = 28, 2, .5
-    assert pace.protocol_settings(resnet, True, 1., False) == protocol
+    assert dasr.protocol_settings(resnet, True, 1., False) == protocol
     assert common.config_to_dict(resnet)["resolved_backbone"]["feature_dim"] == 512
     with pytest.raises(ValueError, match="backbone"):
         checkpoint_compat.validated_state({"model": common.make_backbone(wrn).state_dict()}, common.make_backbone(resnet))
@@ -153,7 +153,7 @@ def test_resnet_baselines_four_stage_training_and_resume(tmp_path, monkeypatch, 
         pytest.skip('Full ResNet-18 multi-stage checkpoint test requires 2 GiB free disk')
     module = {"sseat": sseat, "crt": crt}[method]
     cfg = make_config(tmp_path, method)
-    bundle = pace.synthetic_loaders(cfg)
+    bundle = dasr.synthetic_loaders(cfg)
     monkeypatch.setattr(module, "build_dataloaders", lambda _: bundle)
     invoke = (lambda: sseat.run(cfg)) if method == "sseat" else (lambda: crt.run(cfg, crt.CRTOptions()))
     results = invoke()
@@ -166,7 +166,7 @@ def test_resnet_baselines_four_stage_training_and_resume(tmp_path, monkeypatch, 
     assert invoke() == results
 
 
-def test_resnet_pace_fg_lazy_four_stages_queue_and_resume(tmp_path, monkeypatch):
+def test_resnet_dasr_fg_lazy_four_stages_queue_and_resume(tmp_path, monkeypatch):
     import shutil
     if shutil.disk_usage(tmp_path).free < 2 * 1024**3:
         pytest.skip('Full ResNet-18 multi-stage checkpoint test requires 2 GiB free disk')
@@ -184,7 +184,7 @@ def test_resnet_pace_fg_lazy_four_stages_queue_and_resume(tmp_path, monkeypatch)
     monkeypatch.setattr(far_replay, "decompose", force_cache_branch)
     args = dict(policy="uniform", smoke=True, replay_source_mode="fg_adaptive_lazy",
                 far_monitor_size=4, far_history_size=4)
-    pace.run_experiment(cfg, **args)
+    dasr.run_experiment(cfg, **args)
     checkpoint = torch.load(cfg.run_dir / "stage3_pgd_resume.pt", weights_only=False, map_location="cpu")
     assert checkpoint["queue"]["features"].shape[1] == 512
     assert "layer4.0.conv1.weight" in checkpoint["teacher"]
@@ -194,13 +194,13 @@ def test_resnet_pace_fg_lazy_four_stages_queue_and_resume(tmp_path, monkeypatch)
     assert all(math.isfinite(row["loss"]) for row in rows)
     before = (cfg.run_dir / "final_test.json").read_bytes()
     cfg.resume = True
-    monkeypatch.setattr(pace, "train_epoch", lambda *a, **kw: pytest.fail("Unexpected retraining"))
-    pace.run_experiment(cfg, eval_only=True, **args)
+    monkeypatch.setattr(dasr, "train_epoch", lambda *a, **kw: pytest.fail("Unexpected retraining"))
+    dasr.run_experiment(cfg, eval_only=True, **args)
     assert (cfg.run_dir / "final_test.json").read_bytes() == before
 
 
 def test_resnet_aa_balance_feature_cache_and_checkpoint_roundtrip(tmp_path, monkeypatch):
-    cfg = make_config(tmp_path, "pace")
+    cfg = make_config(tmp_path, "dasr")
     cfg.max_eval_batches = None
     cfg.final_test_methods = ("clean", "autoattack_l2", "autoattack")
     cfg.plot_final_features, cfg.autoattack_samples, cfg.autoattack_batch_size = True, 10, 2
@@ -248,7 +248,7 @@ def test_batch_launcher_resnet_resume_paths(tmp_path, launcher):
                      output_root=str(tmp_path), dataset="cifar10", run_name="", data_root="./data",
                      policy="dtr", resume=True, modes=["fg_adaptive_lazy"], resume_mode="epoch",
                      backbone="resnet18", replay_source_mode="fg_adaptive_lazy")
-    cfg = common.ExperimentConfig(method="pace_dtr_fg_adaptive_lazy", dataset="cifar10",
+    cfg = common.ExperimentConfig(method="dasr_dtr_fg_adaptive_lazy", dataset="cifar10",
                                   backbone="resnet18", output_root=str(tmp_path), run_name="")
     cfg.run_dir.mkdir()
     (cfg.run_dir / "stub.pt").touch()
@@ -259,7 +259,7 @@ def test_batch_launcher_resnet_resume_paths(tmp_path, launcher):
 
 def test_matched_study_launcher_resnet_anchor_and_resume(tmp_path, monkeypatch):
     import run_replay_study
-    cfg = common.ExperimentConfig(method="pace_dtr_fg_adaptive_lazy", dataset="cifar10",
+    cfg = common.ExperimentConfig(method="dasr_dtr_fg_adaptive_lazy", dataset="cifar10",
                                   backbone="resnet18", output_root=str(tmp_path), run_name="study")
     cfg.run_dir.mkdir()
     (cfg.run_dir / "stub.pt").touch()

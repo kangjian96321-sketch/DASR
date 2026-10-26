@@ -11,9 +11,9 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pace_aligned import common
-from pace_aligned import feature_plots as plots
-import train_replay_comparison as pace
+from dasr_aligned import common
+from dasr_aligned import feature_plots as plots
+import train_DASR as dasr
 
 
 class TinyFeatureModel(torch.nn.Module):
@@ -28,7 +28,7 @@ class TinyFeatureModel(torch.nn.Module):
 
 
 def config(tmp_path):
-    return common.ExperimentConfig(method="pace", dataset="cifar10", device="cpu", workers=0,
+    return common.ExperimentConfig(method="dasr", dataset="cifar10", device="cpu", workers=0,
                                    output_root=str(tmp_path), run_name="features", batch_size=3,
                                    autoattack_batch_size=2, autoattack_samples=5,
                                    final_test_methods=("clean", "pgd"), plot_final_features=True,
@@ -136,16 +136,16 @@ def test_aa_subset_ids_match_clean_without_second_attack(tmp_path, monkeypatch):
 
 def test_plot_options_do_not_change_training_identity(tmp_path, monkeypatch):
     cfg = config(tmp_path)
-    first = pace.protocol_settings(cfg, True, 1., False)
+    first = dasr.protocol_settings(cfg, True, 1., False)
     cfg.plot_final_features = False
     cfg.tsne_samples = 99
     cfg.feature_distance = "cosine"
-    assert pace.protocol_settings(cfg, True, 1., False) == first
+    assert dasr.protocol_settings(cfg, True, 1., False) == first
     captured = []
-    monkeypatch.setattr(pace, "run_experiment", lambda cfg, *a, **kw: captured.append(cfg))
-    pace.main(["--dataset", "imagenette", "--plot-final-features", "--tsne-samples", "0"])
+    monkeypatch.setattr(dasr, "run_experiment", lambda cfg, *a, **kw: captured.append(cfg))
+    dasr.main(["--dataset", "imagenette", "--plot-final-features", "--tsne-samples", "0"])
     assert captured[0].plot_final_features and captured[0].tsne_samples == 0
-    from pace_aligned import sseat
+    from dasr_aligned import sseat
     args = sseat.build_parser().parse_args(["--plot-final-features", "--feature-distance", "normalized_l2"])
     assert common.config_from_args("sseat", args).feature_distance == "normalized_l2"
 
@@ -213,7 +213,7 @@ def test_partial_cache_is_not_plotted(tmp_path):
         plots.plot_cached_features(tmp_path)
 
 
-def test_pace_accuracy_only_run_can_add_features_without_retraining(tmp_path, monkeypatch):
+def test_dasr_accuracy_only_run_can_add_features_without_retraining(tmp_path, monkeypatch):
     from ablation_config import method_name
     cfg = common.ExperimentConfig(
         method=method_name("uniform", "full"), dataset="cifar10", device="cpu", workers=0,
@@ -221,18 +221,18 @@ def test_pace_accuracy_only_run_can_add_features_without_retraining(tmp_path, mo
         batch_size=4, train_attack_steps=1, eval_attack_steps=1, cw_eval_steps=1,
         task_epochs=dict.fromkeys(common.TASKS, 1), max_train_batches=1, max_eval_batches=1,
         final_test_methods=("clean", "pgd"))
-    pace.run_experiment(cfg, policy="uniform", smoke=True)
+    dasr.run_experiment(cfg, policy="uniform", smoke=True)
     initial = json.loads((cfg.run_dir / "final_test.json").read_text())
     cfg.resume = True
     cfg.plot_final_features = True
-    monkeypatch.setattr(pace, "train_epoch", lambda *a, **kw: pytest.fail("Unexpected retraining"))
+    monkeypatch.setattr(dasr, "train_epoch", lambda *a, **kw: pytest.fail("Unexpected retraining"))
     monkeypatch.setattr(plots.FeatureStore, "render", lambda *a: None)
-    pace.run_experiment(cfg, policy="uniform", smoke=True, eval_only=True)
+    dasr.run_experiment(cfg, policy="uniform", smoke=True, eval_only=True)
     _, data = plots.load_feature_cache(cfg.run_dir)
     assert set(data) == {"clean", "pgd"}
     assert json.loads((cfg.run_dir / "final_test.json").read_text()) == initial
     timestamps = {p.name: p.stat().st_mtime_ns for p in (cfg.run_dir / "final_features").glob("*.npz")}
-    pace.run_experiment(cfg, policy="uniform", smoke=True, eval_only=True)
+    dasr.run_experiment(cfg, policy="uniform", smoke=True, eval_only=True)
     assert timestamps == {p.name: p.stat().st_mtime_ns for p in (cfg.run_dir / "final_features").glob("*.npz")}
 
 

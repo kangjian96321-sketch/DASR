@@ -8,10 +8,10 @@ import pytest
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import train_replay_comparison as training
-import train_pace_clean_linf_l2_patch as entry
+import train_DASR as training
+import train_DASR_clean_linf_l2_patch as entry
 from far_replay import SOURCE_MODES
-from pace_aligned.common import ExperimentConfig, TASKS
+from dasr_aligned.common import ExperimentConfig, TASKS
 
 
 NEW = ('clean', 'pgd', 'pgd_l2', 'patch')
@@ -41,7 +41,7 @@ def test_original_defaults_and_joint_unchanged(capsys):
     result = json.loads(capsys.readouterr().out)
     assert result['task_sequence'] == list(OLD)
     assert TASKS == OLD
-    from pace_aligned import joint
+    from dasr_aligned import joint
     cfg, options = joint.resolve_config(joint.build_parser().parse_args([]))
     assert options.attacks == OLD and cfg.task_sequence == ('clean', 'joint')
 
@@ -62,7 +62,7 @@ def test_fixed_entry_rejects_conflicting_sequence():
 
 
 def test_task_order_participates_in_identity():
-    cfg = ExperimentConfig(method='pace', task_sequence=OLD)
+    cfg = ExperimentConfig(method='dasr', task_sequence=OLD)
     old = training.digest(training.protocol_settings(cfg, True, 1., False))
     cfg.task_sequence = NEW
     assert old != training.digest(training.protocol_settings(cfg, True, 1., False))
@@ -71,7 +71,7 @@ def test_task_order_participates_in_identity():
 def tiny_config(root, mode):
     torch.set_num_threads(2)
     return ExperimentConfig(
-        method='pace_uniform_' + mode, dataset='cifar10', output_root=str(root),
+        method='dasr_uniform_' + mode, dataset='cifar10', output_root=str(root),
         run_name='sequence_test', device='cpu', workers=0, batch_size=4,
         depth=10, widen_factor=1, dropout=0., task_sequence=NEW,
         # Exercise several eligible epochs after the shared warmup.
@@ -109,7 +109,7 @@ def test_real_training_seen_tasks_replay_and_selected_models(completed):
         selected = torch.load(cfg.run_dir / f'stage{stage}_{task}_selected.pt',
                               map_location='cpu', weights_only=False)
         assert selected['settings']['config']['task_sequence'] == NEW
-        from pace_aligned.selection import best_eligible
+        from dasr_aligned.selection import best_eligible
         assert best_eligible(cfg, task, selected['epoch'])
     bank = torch.load(cfg.run_dir / 'far_history_bank.pt', map_location='cpu', weights_only=False)
     assert set(bank['tasks']) == set(NEW)

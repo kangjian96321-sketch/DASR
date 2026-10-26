@@ -1,74 +1,67 @@
-# Release verification / 发布验证
+# Rename-release verification / 命名版验证
 
-Date: 2026-10-25. Target: `DASR_PACE_GitHub_20261025`.
-Runtime: Windows, Python 3.12.14, PyTorch 2.4.1+cpu.
-Exact observed package versions: [test_environment.json](test_environment.json).
+Date: 2026-10-26. Target: `DASR_GitHub_20261026`.
+Base: the verified 86-file release dated 2026-10-25.
+Observed local CPU environment is recorded in [test_environment.json](test_environment.json).
 
-## Final regression
+## Regression
 
-**299 passed, 3 skipped, 0 failures, 0 errors** in 126.54 seconds.
-There were 62 warnings: existing PyTorch scheduler epoch-argument deprecation and
-Matplotlib/pyparsing deprecations; these are not suppressed in the runner.
+**311 passed, 3 skipped, 0 failures, 0 errors**, 121.27 seconds.
+62 warnings concern existing scheduler / Matplotlib / pyparsing deprecations.
 
 ```bash
 python -B -m pytest -q tests --prune-test-artifacts -p no:cacheprovider
 ```
 
-The final local run also set `OMP_NUM_THREADS=1` and `MKL_NUM_THREADS=1`, used a
-separate pytest temporary directory, and exported JUnit XML outside the package.
-Earlier diagnostic runs revealed and led to fixes for warmup recovery, Clean
-lazy-cache recovery, and CRT CLI validation. Their partial results are not used
-as evidence that the final suite passed.
+The local command additionally used a dedicated pytest temporary directory and
+`OMP_NUM_THREADS=1`, `MKL_NUM_THREADS=1`. JUnit results are retained outside the
+source package, without bundling machine-specific temporary paths.
 
-Covered:
+Coverage includes every retained regression from the base release, plus new
+DASR CLI naming, old/new sequence defaults, module imports and absence of old
+entry-point files. Existing cases cover routing, sampling, validation reuse,
+warmup/zero selection, checkpoint recovery, backbones and plotting.
 
-- New and old sequence entry points and explicit configuration propagation.
-- monitor/history defaults 500/500; balanced sampling and full-validation reuse.
-- Scheduler-aligned best eligibility, all-zero means, ties, invalid values.
-- Warmup interruption and resumed selection without manufacturing a warmup best.
-- Synthetic-data training and checkpoint recovery for the supported methods.
-- Fixed historical/regenerated/F-G/eager/lazy replay routing and cache behavior.
-- Real backbone shape/forward/backward checks, including ResNet inputs.
-- AutoAttack batching and balanced subset selection using controlled substitutes.
-- Feature plotting, shared 2D/3D coordinates and paired input indexing.
-- CRT Lp ALR dispatch, gradients, train/eval modes and BatchNorm effects.
+Three tests explicitly skipped because less than 2 GiB free temporary space was
+available: full ResNet multi-stage SSEAT, CRT, and DASR F/G-lazy training+resume.
+They are not reported as passed. Real ResNet forward/backward checks are separate.
+No GitHub Actions run was triggered by this local work.
 
-Three tests explicitly skipped because less than 2 GiB free temporary disk was
-available:
+## Before/after numerical comparison
 
-1. ResNet SSEAT four-stage training + resume.
-2. ResNet CRT four-stage training + resume.
-3. ResNet PACE F/G-lazy four-stage training + queue + resume.
+**2 attack orders, 8 stages, all exact comparisons passed.**
+Details: [rename_parity.json](rename_parity.json).
 
-These are **not counted as passed**. Run the same suite with several GiB free to
-exercise them; GitHub Actions is configured but has not been run remotely here.
+Both original and renamed code ran in independent Python processes, seed42,
+CPU, synthetic CIFAR-shaped inputs, WRN-10-1, 3 epochs per stage and one training/
+evaluation batch per epoch. Uniform task selection and F/G-lazy replay were used.
 
-## CRT reference parity
+Compared tensors and values:
 
-**60 / 60 passed**, maximum absolute difference **0** in this CPU float32 run.
-Details: [crt_alr_parity.json](crt_alr_parity.json).
+- Selected model parameters/buffers, chosen epoch, score and full validation.
+- Resume model, EMA, optimizer, scheduler, queue, F/G metrics, reference and
+  observed accuracies, best score, running gradient similarity.
+- Per-epoch numerical logs after excluding names and profiling/time fields.
 
-- Reference: official `L2Reg(var_reg=False)` at commit
-  `5a6932430219d531aab5736de94292b149ff73ae`.
-- Reference SHA256 enforced by `check_crt_lp_alr.py`.
-- 2 norms × 5 step counts (1,2,3,4,10) × 2 model modes × 3 test models.
-- Compared generated perturbations, scalar loss, parameter gradients, BN state.
-- The reference is adjusted only to replace hard-coded CUDA placement with the
-  requested device. It is not bundled with this source package.
+This is a bounded deterministic rename check, not a new real-dataset experiment
+or a guarantee of bitwise equality across hardware/software environments.
+Method names and protocol fingerprints intentionally differ.
 
-This verifies individual regularizer calls, **not full official CRT training
-trajectory parity**. Patch regularization remains the project's extension.
+## Static integrity and retained ALR evidence
 
-## Scope and limits / 测试边界
+All 67 inherited Python files retain exactly the same AST after applying only
+the documented naming substitution. One new naming-test module is added.
+The CRT Lp ALR implementation is byte-identical to the base version under its
+new path. [crt_alr_parity.json](crt_alr_parity.json) retains the **20261025**
+60-case upstream parity evidence; it is not presented as a fresh GPU evaluation.
 
-本次未重新运行真实 CIFAR/Imagenette 全程 GPU 实验、真实完整 AutoAttack，
-也未在干净系统重新求解/安装 Conda 环境。因此不能据此承诺论文准确率、GPU 峰值显存、
-训练时间或所有平台的安装成功。AutoAttack 安装依赖未固定 commit，正式实验需记录并固定。
+The release is audited for valid Python syntax, unresolved old import/entry
+names, local Markdown links and excluded runtime artifacts. Source files and
+ZIP contents receive SHA256 verification. See `release_manifest.json`.
 
-本版选模规则会改变后续阶段起点，旧实验结果不能直接作为本版结果。
-SSEAT/CRT 保留历史任务子集选模；这项验证范围差异并未因为统一均值和 warmup 而消失。
+## Limits / 限制
 
-The distribution contains source, docs, environment recipes and tests only.
-Python syntax and Markdown relative links are audited before packaging; the ZIP
-is reopened for CRC and per-file SHA256 verification. The generated
-`release_manifest.json` lists source changes and hashes, excluding its own hash.
+未重新进行正式 Imagenette/CIFAR GPU 训练、完整 AutoAttack 或干净 Conda 安装验证。
+本次不改变算法和数值参数，但更名会影响运行标签、部分配置指纹和旧原生断点识别。
+不要覆盖正在运行的服务器代码；旧实验使用原版本，新版使用独立目录。
+本次没有自动修改 GitHub，也没有建立新的第三方源码再发布许可。

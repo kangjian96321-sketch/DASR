@@ -1,5 +1,5 @@
 """SSEAT on Clean -> PGD-Linf -> PGD-L2 -> Patch; native ADR/CRS unchanged."""
-from pace_aligned import sseat
+from dasr_aligned import sseat
 from sequence_clean_linf_l2_patch import entry_defaults, set_sequence, validate_resume_sequence
 
 

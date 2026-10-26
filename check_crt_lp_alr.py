@@ -17,8 +17,8 @@ import subprocess
 
 import torch
 from torch import nn
-from pace_aligned.common import ExperimentConfig, isolated_random_seed
-from pace_aligned.crt_lp_alr import _maximize, lp_parameters, official_lp_alr
+from dasr_aligned.common import ExperimentConfig, isolated_random_seed
+from dasr_aligned.crt_lp_alr import _maximize, lp_parameters, official_lp_alr
 
 REFERENCE_COMMIT = '5a6932430219d531aab5736de94292b149ff73ae'
 REFERENCE_SHA256 = '87ba0a7f348ab802f03fd31156abc860a0809147bb9b1fc0dc1bbd56db9a937d'

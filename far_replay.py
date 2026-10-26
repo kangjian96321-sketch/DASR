@@ -1,4 +1,4 @@
-"""F/G decomposition and historical-adversarial replay sources for PACE.
+"""F/G decomposition and historical-adversarial replay sources for DASR.
 
 The monitor cache is always established from each task's selected checkpoint.
 Training caches are either eager, absent, or built on first historical use.
@@ -15,7 +15,7 @@ from typing import Mapping, Sequence
 
 import torch
 
-from pace_aligned.common import (
+from dasr_aligned.common import (
     attack_logits,
     base_prediction,
     class_balanced_indices,

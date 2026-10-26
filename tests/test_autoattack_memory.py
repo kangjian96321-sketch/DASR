@@ -18,8 +18,8 @@ from torch.utils.data import DataLoader, TensorDataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pace_aligned import common, sseat
-import train_replay_comparison as pace
+from dasr_aligned import common, sseat
+import train_DASR as dasr
 
 
 class BatchGuard(torch.nn.Module):
@@ -73,7 +73,7 @@ def test_autoattack_full_cpu_subset_and_bounded_final_forward(fake_autoattack, n
     y = predicted.clone()
     y[::3] = 1 - y[::3]
     loader = DataLoader(TensorDataset(x, y), batch_size=4)
-    cfg = common.ExperimentConfig(method="pace", autoattack_samples=requested,
+    cfg = common.ExperimentConfig(method="dasr", autoattack_samples=requested,
                                   autoattack_batch_size=3, autoattack_subset_seed=17,
                                   output_root=str(tmp_path))
     model = BatchGuard(3)
@@ -109,7 +109,7 @@ def test_autoattack_full_cpu_subset_and_bounded_final_forward(fake_autoattack, n
                                         ("autoattack_batch_size", -1),
                                         ("autoattack_samples", -1)])
 def test_autoattack_rejects_invalid_limits(field, value):
-    cfg = common.ExperimentConfig(method="pace")
+    cfg = common.ExperimentConfig(method="dasr")
     setattr(cfg, field, value)
     with pytest.raises(ValueError, match="must be"):
         common.evaluate_autoattack(BatchGuard(2), None, "L2", .5, cfg, torch.device("cpu"))
@@ -119,12 +119,12 @@ def test_autoattack_rejects_empty_dataset(fake_autoattack):
     loader = DataLoader(TensorDataset(torch.empty(0, 2), torch.empty(0, dtype=torch.long)))
     with pytest.raises(ValueError, match="dataset is empty"):
         common.evaluate_autoattack(BatchGuard(2), loader, "L2", .5,
-                                   common.ExperimentConfig(method="pace"), torch.device("cpu"))
+                                   common.ExperimentConfig(method="dasr"), torch.device("cpu"))
 
 
 @pytest.mark.parametrize("method", ["sseat", "crt"])
 def test_baseline_aa_batch_override_leaves_training_batch_unchanged(method):
-    parser = importlib.import_module(f"pace_aligned.{method}").build_parser()
+    parser = importlib.import_module(f"dasr_aligned.{method}").build_parser()
     args = parser.parse_args(["--dataset", "imagenette", "--autoattack-batch-size", "1",
                               "--autoattack-samples", "0"])
     cfg = common.config_from_args(method, args)
@@ -135,22 +135,22 @@ def test_baseline_aa_batch_override_leaves_training_batch_unchanged(method):
         common.config_from_args(method, args)
 
 
-def test_pace_aa_override_preserves_training_identity(monkeypatch):
+def test_dasr_aa_override_preserves_training_identity(monkeypatch):
     captured = []
-    monkeypatch.setattr(pace, "run_experiment", lambda cfg, *a, **kw: captured.append(cfg))
+    monkeypatch.setattr(dasr, "run_experiment", lambda cfg, *a, **kw: captured.append(cfg))
     base = ["--dataset", "imagenette", "--resume", "--eval-only",
             "--far-monitor-size", "500", "--far-history-size", "500"]
-    pace.main(base)
-    pace.main(base + ["--autoattack-batch-size", "1", "--autoattack-samples", "0"])
+    dasr.main(base)
+    dasr.main(base + ["--autoattack-batch-size", "1", "--autoattack-samples", "0"])
     old, new = captured
     assert old.batch_size == new.batch_size == 64
     assert old.autoattack_batch_size == 32 and new.autoattack_batch_size == 1
     assert old.autoattack_samples == 1000 and new.autoattack_samples == 0
-    assert pace.protocol_settings(old, True, 1.0, False) == pace.protocol_settings(new, True, 1.0, False)
+    assert dasr.protocol_settings(old, True, 1.0, False) == dasr.protocol_settings(new, True, 1.0, False)
     with pytest.raises(ValueError, match="must be positive"):
-        pace.main(base + ["--autoattack-batch-size", "0"])
+        dasr.main(base + ["--autoattack-batch-size", "0"])
     with pytest.raises(ValueError, match="must be nonnegative"):
-        pace.main(base + ["--autoattack-samples", "-1"])
+        dasr.main(base + ["--autoattack-samples", "-1"])
 
 
 def test_frozen_flags_restored_after_attack_exception(monkeypatch, tmp_path):
@@ -169,7 +169,7 @@ def test_frozen_flags_restored_after_attack_exception(monkeypatch, tmp_path):
     loader = DataLoader(TensorDataset(torch.ones(2, 2), torch.ones(2, dtype=torch.long)))
     with pytest.raises(RuntimeError, match="simulated interrupted attack"):
         common.evaluate_autoattack(model, loader, "L2", .5,
-                                   common.ExperimentConfig(method="pace", output_root=str(tmp_path)), torch.device("cpu"))
+                                   common.ExperimentConfig(method="dasr", output_root=str(tmp_path)), torch.device("cpu"))
     assert model.scale.requires_grad and not model.already_frozen.requires_grad
 
 

@@ -1,0 +1,105 @@
+{
+  "scope": "CPU synthetic CIFAR-shaped WRN-10-1, seed42, 3 epochs per stage, one training/eval batch, uniform task selection, F/G-lazy replay; not a real-dataset reproduction",
+  "sequences": 2,
+  "stages_compared": 8,
+  "passed": true,
+  "method_labels_and_protocol_signatures_intentionally_differ": true,
+  "cases": [
+    {
+      "sequence": [
+        "clean",
+        "patch",
+        "pgd_l2",
+        "pgd"
+      ],
+      "stage": 0,
+      "task": "clean",
+      "selected_model_and_scores_exactly_equal": true,
+      "resume_training_state_exactly_equal": true
+    },
+    {
+      "sequence": [
+        "clean",
+        "patch",
+        "pgd_l2",
+        "pgd"
+      ],
+      "stage": 1,
+      "task": "patch",
+      "selected_model_and_scores_exactly_equal": true,
+      "resume_training_state_exactly_equal": true
+    },
+    {
+      "sequence": [
+        "clean",
+        "patch",
+        "pgd_l2",
+        "pgd"
+      ],
+      "stage": 2,
+      "task": "pgd_l2",
+      "selected_model_and_scores_exactly_equal": true,
+      "resume_training_state_exactly_equal": true
+    },
+    {
+      "sequence": [
+        "clean",
+        "patch",
+        "pgd_l2",
+        "pgd"
+      ],
+      "stage": 3,
+      "task": "pgd",
+      "selected_model_and_scores_exactly_equal": true,
+      "resume_training_state_exactly_equal": true
+    },
+    {
+      "sequence": [
+        "clean",
+        "pgd",
+        "pgd_l2",
+        "patch"
+      ],
+      "stage": 0,
+      "task": "clean",
+      "selected_model_and_scores_exactly_equal": true,
+      "resume_training_state_exactly_equal": true
+    },
+    {
+      "sequence": [
+        "clean",
+        "pgd",
+        "pgd_l2",
+        "patch"
+      ],
+      "stage": 1,
+      "task": "pgd",
+      "selected_model_and_scores_exactly_equal": true,
+      "resume_training_state_exactly_equal": true
+    },
+    {
+      "sequence": [
+        "clean",
+        "pgd",
+        "pgd_l2",
+        "patch"
+      ],
+      "stage": 2,
+      "task": "pgd_l2",
+      "selected_model_and_scores_exactly_equal": true,
+      "resume_training_state_exactly_equal": true
+    },
+    {
+      "sequence": [
+        "clean",
+        "pgd",
+        "pgd_l2",
+        "patch"
+      ],
+      "stage": 3,
+      "task": "patch",
+      "selected_model_and_scores_exactly_equal": true,
+      "resume_training_state_exactly_equal": true
+    }
+  ]
+}

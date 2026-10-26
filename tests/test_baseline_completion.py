@@ -12,8 +12,8 @@ from torch.utils.data import DataLoader, TensorDataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pace_aligned import crt
-from pace_aligned.common import DataBundle, ExperimentConfig, config_from_args
+from dasr_aligned import crt
+from dasr_aligned.common import DataBundle, ExperimentConfig, config_from_args
 
 
 @pytest.fixture(autouse=True)
@@ -26,7 +26,7 @@ def limit_cpu_threads():
 
 @pytest.mark.parametrize("method", ["sseat", "crt"])
 def test_baseline_import_and_imagenette_configuration(method):
-    module = importlib.import_module(f"pace_aligned.{method}")
+    module = importlib.import_module(f"dasr_aligned.{method}")
     parser = module.build_parser()
     args = parser.parse_args(["--dataset", "imagenette", "--dry-run"])
     cfg = config_from_args(method, args)
@@ -38,7 +38,7 @@ def test_baseline_import_and_imagenette_configuration(method):
     assert cfg.linf_eps == pytest.approx(8 / 255)
     assert cfg.selection_probe_size == 500  # Existing baseline protocol.
     assert cfg.autoattack_samples == 1000
-    entry = importlib.import_module(f"train_{method}_pace_aligned")
+    entry = importlib.import_module(f"train_{method}_dasr_aligned")
     assert entry.main is module.main
 
 

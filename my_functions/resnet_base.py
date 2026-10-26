@@ -42,6 +42,6 @@ class UnifiedResNet18(nn.Module):
         features = torch.flatten(self.avgpool(x), 1)
         logits = self.linear(features)
         if return_feature:
-            # PACE LACD uses item 2; final feature plots use item 1.
+            # DASR LACD uses item 2; final feature plots use item 1.
             return logits, features, features, None
         return logits

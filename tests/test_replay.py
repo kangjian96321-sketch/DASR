@@ -10,8 +10,8 @@ import torch.nn.functional as F
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from replay_policies import ReplaySelector, historical_tasks
-from pace_components import TeacherFeatureQueue, AdaptiveDecoupledLACDLoss
-from train_replay_comparison import ADAPTIVE_TASKS, load_matched_schedule
+from dasr_components import TeacherFeatureQueue, AdaptiveDecoupledLACDLoss
+from train_DASR import ADAPTIVE_TASKS, load_matched_schedule
 
 
 H = ['clean', 'patch', 'pgd_l2']
