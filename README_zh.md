@@ -1,18 +1,26 @@
 # DASR 持续对抗训练代码
 
+DASR：Degradation-Aware Source-Adaptive Replay for Continual Adversarial Training。
+
+**2026-11-02 更新：**所有方法统一使用完整验证集选择 best。
+SSEAT/CRT 的选模与日志复用同一组全量结果。
+见[修改对比、替换文件及续训说明](docs/FULL_VALIDATION_20261102.md)。
+
 [English](README.md)｜[技术与参数](docs/protocol.md)｜[修改前后对比](docs/changes.md)｜[GitHub 上传操作](docs/github_upload_zh.md)
 
-本合集是 20261025 已验证发布版的 20261026 纯命名更新，包含 DASR、SSEAT-aligned、
-CRT-aligned、TRADES、MART、DER++、GSA 和联合训练，以及最终特征可视化。
+当前为基于 20261026 命名版的 **2026-11-02 完整验证集选模版本**，包含 DASR、SSEAT-aligned、
+CRT-aligned、TRADES、MART、DER++、GSA 和联合训练，支持 WRN-34-10、ResNet-18 及最终特征可视化。
 主入口统一为 `train_DASR.py`，逆序入口为 `train_DASR_clean_linf_l2_patch.py`，
 模块统一为 `dasr_aligned` 和 `dasr_components`；导入、批量启动器和测试同步更新。
-本次不改变训练算法、参数和默认攻击顺序。见[更名与文件替换清单](docs/RENAME_20261026.md)。
-**不含 CAD，也不含独立的 Patch 阶段重训工具。**
+本次将 SSEAT/CRT 的历史任务选模从 500 样本子集改为完整验证集，其他方法保持原有全量选模。
+训练损失、攻击预算、重放机制及默认攻击顺序保持不变；选中的 best 改变后，后续训练轨迹可能变化。
+见[选模更新与迁移说明](docs/FULL_VALIDATION_20261102.md)。
 
 ## 本版已经统一的内容
 
 - FAR 默认 `monitor=500`、`history=500`，包括命令行和直接调用函数的默认值。
 - 所有训练器在各自阶段的 warm-up 结束之后才开始选择 best。
+- 当前与历史任务均使用完整验证集选择 best，SSEAT/CRT 复用同一组结果写日志。
 - 对评估条件等权求平均时计入 0%，全 0% 也能选出合法 best；同分保留先出现者。
 - 每个方法均提供新旧两种顺序入口。
 - CRT 的 L2/L∞ ALR 合入后续官方对齐模块；Patch ALR 保留项目扩展实现。
@@ -20,13 +28,20 @@ CRT-aligned、TRADES、MART、DER++、GSA 和联合训练，以及最终特征�
 
 **没有改动的内容：**数据划分、原攻击预算、损失主体、DTR/F/G 路由、缓存跨阶段保留、
 原对比方法的重放机制。没有合入“每阶段刷新 FAR 历史样本”的分支。
-上面列出的 warm-up/计入0%等调整已经包含在 20261025 版，本次没有再次改动。
-本次方法标签、默认运行名和部分协议版本字符串随名称更新，旧原生断点可能因身份检查被拒绝。
-不要通过修改签名或强行改日志继续训练；正在运行的实验保留原目录，命名版放新目录。
+warm-up 和计入 0% 的规则沿用之前的版本。本次更新全局选模协议标识，旧原生断点不能
+直接作为本版断点续训。正在运行的实验保留原目录，本版使用新的结果目录。
 
 ## 1. 安装环境
 
-在解压后的项目根目录运行，二选一：
+可以克隆仓库，也可以下载源码 ZIP 后解压：
+
+```bash
+git clone https://github.com/kangjian96321-sketch/DASR.git
+cd DASR
+```
+
+使用 ZIP 时，在包含 `train_DASR.py` 和 `environment.yml` 的解压目录打开终端。
+后续命令均在项目根目录执行。环境安装二选一：
 
 ```bash
 # NVIDIA GPU 环境：CUDA 12.1 依赖配方
@@ -103,23 +118,23 @@ CUDA_VISIBLE_DEVICES=0 python train_DASR_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
   --policy dtr --ablation full --replay-source-mode fg_adaptive_lazy \
   --far-monitor-size 500 --far-history-size 500 \
-  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name dasr_reverse_s42
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name dasr_reverse_fullval_s42
 
 CUDA_VISIBLE_DEVICES=0 python train_sseat_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
-  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name sseat_reverse_s42
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name sseat_reverse_fullval_s42
 
 CUDA_VISIBLE_DEVICES=0 python train_crt_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
   --crt-strategy croce --crt-use-alr --crt-alr-steps 1 \
   --crt-alr-weight-initial 1 --crt-alr-weight-finetune 0.5 \
-  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name crt_reverse_s42
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name crt_reverse_fullval_s42
 
-CUDA_VISIBLE_DEVICES=0 python train_trades_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name trades_reverse_s42
-CUDA_VISIBLE_DEVICES=0 python train_mart_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name mart_reverse_s42
-CUDA_VISIBLE_DEVICES=0 python train_derpp_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name derpp_reverse_s42
-CUDA_VISIBLE_DEVICES=0 python train_gsa_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name gsa_reverse_s42
-CUDA_VISIBLE_DEVICES=0 python train_joint_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name joint_reverse_s42
+CUDA_VISIBLE_DEVICES=0 python train_trades_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name trades_reverse_fullval_s42
+CUDA_VISIBLE_DEVICES=0 python train_mart_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name mart_reverse_fullval_s42
+CUDA_VISIBLE_DEVICES=0 python train_derpp_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name derpp_reverse_fullval_s42
+CUDA_VISIBLE_DEVICES=0 python train_gsa_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name gsa_reverse_fullval_s42
+CUDA_VISIBLE_DEVICES=0 python train_joint_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name joint_reverse_fullval_s42
 ```
 
 旧顺序换成表格左列入口，并给出独立 `run-name`。CIFAR-100 + WRN-34-10 改为
@@ -130,6 +145,7 @@ Windows PowerShell 不支持开头的 Linux 环境变量语法；先执行
 所有正式命令均可先加 `--dry-run` 查看配置；不能只改 run-name 就认为顺序已改变。
 DASR 的 Imagenette 默认 batch 仍为 64，其他入口通常为 32，所以这里显式指定 32。
 不要向 SSEAT/CRT 传 DASR 专有的 `--ablation`、`--far-*`、`--clean-epochs` 等参数。
+TRADES 默认使用 KL 内循环攻击目标；`--trades-inner-loss ce` 可选择旧 CE 模式。
 
 ## 5. 重放选项与消融
 
@@ -146,8 +162,11 @@ DASR 的 Imagenette 默认 batch 仍为 64，其他入口通常为 32，所以�
 
 任务选择 `--policy` 支持 `dtr/random/uniform/lowest_accuracy`。
 消融支持 `full/only_cls/no_distillation/no_contrast/fixed_weights/no_queue/fixed_temperature/no_dtr`。
-批量运行脚本 `run_ablations.py`、`run_replay_study.py`、`run_far_source_modes.py` 默认仍使用旧顺序；
-逆序需显式追加 `--task-sequence clean pgd pgd_l2 patch`，并使用新的输出根目录。
+批量运行脚本 `run_ablations.py`、`run_far_source_modes.py` 默认使用旧顺序；
+逆序可追加 `--task-sequence clean pgd pgd_l2 patch`，并使用新的输出根目录。
+`run_replay_study.py` 固定使用旧顺序，不接受 `--task-sequence`。
+逆序选择器对比请分别调用 DASR 逆序入口；需要匹配重放触发日程时，对照组使用
+`--match-schedule` 指向 DTR 运行生成的 `replay_schedule.json`。
 
 ## 6. best、恢复与最终测试
 
@@ -156,8 +175,10 @@ DASR 的 Imagenette 默认 batch 仍为 64，其他入口通常为 32，所以�
 warm-up 期间仍进行训练、验证及断点保存，但不把这些模型当作 best。
 单轮诊断训练没有 warm-up，可选择唯一一轮；正式默认日程不受该边界处理影响。
 
-所有方法计入 0%，但本次没有把验证样本范围也统一：SSEAT/CRT 仍然当前任务全验证、
-历史任务固定子集选模；DASR 和四个额外基线使用完整验证集。详见 `docs/protocol.md`。
+所有方法计入 0%，并统一使用完整验证集选择 best。SSEAT/CRT 的当前与历史任务均复用
+完整验证结果作为日志和选模依据；FAR monitor/history 仍为 500/500。
+显式诊断用的验证批次数上限仍然有效，正式实验不要设置该上限。
+选模协议版本已更新，请使用新结果目录，不要直接续训更新前的原生断点。详见 `docs/protocol.md`。
 
 - DASR 精确到 epoch 续训：原完整命令追加 `--resume --resume-mode epoch`。
   请保留完整运行目录：尚未生成的历史攻击缓存仍需要对应的 `*_selected.pt`。
@@ -202,8 +223,10 @@ python train_DASR.py --smoke --dataset cifar10 --run-name smoke_check
 三项完整 ResNet 多阶段 checkpoint 测试需要至少 2 GiB 临时磁盘空间，不足会明确跳过。
 其余测试含合成数据训练、重放、恢复、真实网络前向/反向、模拟 AA 及绘图，
 不等于重新完成 Imagenette/CIFAR 的正式 GPU 实验。
+本版于 2026-11-02 完成 CPU 回归：**323 项通过，无跳过**，详见 `docs/TEST_REPORT.md`。
 `--prune-test-artifacts` 仅清理 pytest 生成的函数级临时文件，失败调试时可不加。
 
 源代码包不含数据集、权重、真实实验日志或本机绝对路径。`.gitignore` 也排除了这些运行产物。
-实际上传操作见 [GitHub 上传说明](docs/github_upload_zh.md)。上传前需自行确认作者、论文信息、
-代码权属和第三方许可；本包没有擅自添加 MIT 等仓库级许可证。
+实际上传操作见 [GitHub 上传说明](docs/github_upload_zh.md)。
+第三方来源见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)；当前源码版本未包含仓库级
+LICENSE 和定稿论文引用信息。

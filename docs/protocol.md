@@ -95,17 +95,21 @@ missing/extra conditions, NaN, infinity and values outside [0,100] are rejected.
 Default eligibility: Clean epoch7+, attack epoch3+; one-epoch diagnostics have
 zero warmup. Equal scores do not replace the existing eligible best.
 
-The **mean formula and time gate are unified, not every validation sample**:
+The mean formula, time gate and full-validation selection scope are unified:
 
 | Trainer | Selection set |
 |---|---|
 | DASR, TRADES, MART, DER++, GSA | full validation for every seen task |
-| SSEAT, CRT | current task full validation; historical tasks fixed monitor (500 by default) |
+| SSEAT, CRT | full validation for every seen task |
 | Joint | full validation for phase conditions |
 
-SSEAT/CRT still log full-validation historical accuracies separately. This known
-difference must be disclosed when presenting aligned comparisons. It was not
-silently changed by the request to count zero accuracies.
+SSEAT/CRT reuse one full-validation pass per seen condition for logging and
+selection: `selection_<task> == val_<task>` and `selection_mean == val_mean`.
+The FAR monitor/history defaults remain 500/500 and do not limit selection.
+An explicitly configured diagnostic `max_eval_batches` still limits evaluation;
+leave it unset in formal full-validation runs. The 20261102 policy version
+rejects old native resumes rather than mixing subset-selected and full-set
+checkpoints. See [migration details](FULL_VALIDATION_20261102.md).
 
 ## CRT ALR provenance and scope
 

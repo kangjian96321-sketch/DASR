@@ -29,7 +29,6 @@ from .common import (
     clone_frozen,
     config_from_args,
     evaluate_for_selection,
-    evaluate_seen,
     final_evaluation,
     generate_attack,
     js_divergence,
@@ -480,12 +479,10 @@ def run(cfg: ExperimentConfig) -> Dict[str, float]:
                         cfg,
                         device,
                     )
-                    historical = [name for name in seen if name != task]
-                    validation = {task: selection[task]}
-                    if historical:
-                        validation.update(evaluate_seen(model, loaders.val, historical, cfg, device))
-                    mean_accuracy = sum(validation.values()) / len(validation)
+                    # Log and select from the same full-validation pass.
+                    validation = dict(selection)
                     selection_mean = mean_selection(selection, seen)
+                    mean_accuracy = selection_mean
                     row = {
                         "stage": task_index,
                         "task": task,

@@ -1,7 +1,7 @@
 """Shared checkpoint-selection definition, independent of training algorithms."""
 import math
 
-SELECTION_POLICY = "post_warmup_mean_all_seen_including_zero_v1_20261025"
+SELECTION_POLICY = "post_warmup_mean_all_seen_including_zero_full_validation_v2_20261102"
 OLD_SEQUENCE = ("clean", "patch", "pgd_l2", "pgd")
 NEW_SEQUENCE = ("clean", "pgd", "pgd_l2", "patch")
 

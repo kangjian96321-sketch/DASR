@@ -153,6 +153,7 @@ class ExperimentConfig:
     feature_bins: int = 60
 
     validate_every: int = 1
+    # Monitoring only. Best-checkpoint selection always uses loaders.val.
     selection_probe_size: int = 500
     max_train_batches: Optional[int] = None
     max_eval_batches: Optional[int] = None
@@ -1268,11 +1269,12 @@ def evaluate_for_selection(
     device: torch.device,
     current_accuracy: Optional[float] = None,
 ) -> Dict[str, float]:
-    """Retain the SSEAT/CRT current-full, historical-monitor selection split.
+    """Evaluate every seen task on the full validation loader for selection.
 
-    The current task is evaluated on the full validation set. Every previous
-    task, including clean once it becomes historical, is evaluated on the
-    fixed first ``selection_probe_size`` validation examples.
+    ``current_accuracy``, when supplied, must be the full-validation accuracy
+    of this exact model and evaluation configuration. Monitoring subsets do
+    not participate in best-checkpoint selection. Explicit diagnostic batch
+    limits in ``cfg`` are still honored by the evaluation functions.
     """
 
     current = (
@@ -1283,7 +1285,7 @@ def evaluate_for_selection(
     result = {current_task: current}
     historical = [task for task in seen_tasks if task != current_task]
     if historical:
-        result.update(evaluate_seen(model, loaders.selection_val, historical, cfg, device))
+        result.update(evaluate_seen(model, loaders.val, historical, cfg, device))
     return result
 
 

@@ -1,26 +1,33 @@
-# DASR: continual adversarial training
+# DASR: Degradation-Aware Source-Adaptive Replay for Continual Adversarial Training
+
+**2026-11-02 update:** every trainer selects best on the full validation set.
+SSEAT/CRT reuse those results for logging and selection. See
+[changes, replacement files and resume compatibility](docs/FULL_VALIDATION_20261102.md).
 
 [中文说明](README_zh.md) · [Protocol and parameters](docs/protocol.md) · [Changes](docs/changes.md) · [GitHub upload guide](docs/github_upload_zh.md)
 
 Research implementation of continual adversarial training with task selection,
 historical-versus-regenerated replay, feature distillation, and comparison baselines.
-This release uses DASR module, entry-point and newly generated method names. It contains
-DASR, SSEAT-aligned, CRT-aligned, TRADES, MART, DER++, GSA, and Joint-Mean.
-It contains neither CAD nor the standalone Patch-stage restart utility.
+The repository contains DASR, SSEAT-aligned, CRT-aligned, TRADES, MART, DER++, GSA,
+and Joint-Mean, with WRN-34-10 and ResNet-18 backbones and final-test visualizations.
 
 ## Release definition
 
-The 20261026 update renames the validated 20261025 release; it does not change
-training algorithms or hyperparameters. `train_DASR.py` is the main entry;
+This snapshot is the **2026-11-02 full-validation selection release**, based on
+the 2026-10-26 DASR naming release. Every method selects best checkpoints using
+the full validation set; SSEAT/CRT now reuse those scores for logging and
+selection instead of selecting historical-task scores on a 500-example subset.
+`train_DASR.py` is the main entry;
 `train_DASR_clean_linf_l2_patch.py` fixes the reverse sequence. Import modules
-are `dasr_aligned` and `dasr_components`. See [migration and complete file list](docs/RENAME_20261026.md).
+are `dasr_aligned` and `dasr_components`.
 
 Inherited settings: all trainers select best only after warmup, means include
 zero accuracies, FAR defaults are **500/500**, and CRT uses the aligned L2/Linf ALR.
-Method/run labels and some protocol-version strings change with the name.
-Do not mix old and renamed native resume files or overwrite an active training
-checkout. Finish existing experiments with their original version; use a new
-directory for this release. No checkpoint-identity validation was bypassed.
+The update preserves training losses, attack budgets, replay mechanisms and
+task orders. A different selected best can change subsequent training.
+The selection-policy identifier has changed: use a new run directory for this
+release and finish existing experiments with their original version.
+See [selection changes and migration](docs/FULL_VALIDATION_20261102.md).
 
 Historical FAR examples still come from each attack's original selected model
 and persist across stages. Updating the preceding-stage accuracy reference does
@@ -28,7 +35,16 @@ not regenerate those examples. The stage-refreshed FAR branch is not included.
 
 ## 1. Environment
 
-Run commands from this repository root. Python 3.12 and the torch 2.4.1 /
+Clone the repository, or download and extract its source ZIP:
+
+```bash
+git clone https://github.com/kangjian96321-sketch/DASR.git
+cd DASR
+```
+
+When using a ZIP, open a terminal in the extracted directory containing
+`train_DASR.py` and `environment.yml`. Run all commands from that directory.
+Python 3.12 and the torch 2.4.1 /
 torchvision 0.19.1 pair are the regression target. Choose one setup:
 
 ```bash
@@ -121,32 +137,43 @@ CUDA_VISIBLE_DEVICES=0 python train_DASR_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
   --policy dtr --ablation full --replay-source-mode fg_adaptive_lazy \
   --far-monitor-size 500 --far-history-size 500 \
-  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name dasr_reverse_s42
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name dasr_reverse_fullval_s42
 
 CUDA_VISIBLE_DEVICES=0 python train_sseat_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
-  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name sseat_reverse_s42
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name sseat_reverse_fullval_s42
 
 CUDA_VISIBLE_DEVICES=0 python train_crt_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
   --crt-strategy croce --crt-use-alr --crt-alr-steps 1 \
   --crt-alr-weight-initial 1 --crt-alr-weight-finetune 0.5 \
-  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name crt_reverse_s42
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name crt_reverse_fullval_s42
 
 CUDA_VISIBLE_DEVICES=0 python train_trades_clean_linf_l2_patch.py \
   --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
-  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name trades_reverse_s42
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name trades_reverse_fullval_s42
+
+CUDA_VISIBLE_DEVICES=0 python train_mart_clean_linf_l2_patch.py \
+  --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name mart_reverse_fullval_s42
+
+CUDA_VISIBLE_DEVICES=0 python train_derpp_clean_linf_l2_patch.py \
+  --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name derpp_reverse_fullval_s42
+
+CUDA_VISIBLE_DEVICES=0 python train_gsa_clean_linf_l2_patch.py \
+  --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 \
+  --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name gsa_reverse_fullval_s42
 ```
 
-For MART, DER++, and GSA, replace the TRADES script and run name with the matching
-method. TRADES defaults to KL inner attacks; `--trades-inner-loss ce` retains the
+TRADES defaults to KL inner attacks; `--trades-inner-loss ce` retains the
 legacy alternative. To run the old order, choose the left-column script. For
 CIFAR-100 + WRN-34-10 use `--dataset cifar100 --backbone wrn --batch-size 64`;
 CIFAR-10 changes only the dataset. Add `--dry-run` to inspect resolved settings
 without loading data. Do not pass DASR-only flags to other trainers.
 
 ```bash
-python train_joint_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name joint_reverse_s42
+python train_joint_clean_linf_l2_patch.py --dataset imagenette --backbone resnet18 --data-root ./data --batch-size 32 --autoattack-samples 0 --autoattack-batch-size 4 --seed 42 --run-name joint_reverse_fullval_s42
 ```
 
 ### Replay and ablations
@@ -158,10 +185,13 @@ automatic cache-refresh policy.
 
 `--ablation` accepts `full`, `only_cls`, `no_distillation`, `no_contrast`,
 `fixed_weights`, `no_queue`, `fixed_temperature`, and `no_dtr`.
-Batch launchers: `run_ablations.py`, `run_replay_study.py`, `run_far_source_modes.py`.
-They retain the generic entry's old default order; pass
-`--task-sequence clean pgd pgd_l2 patch` to launch the reverse order and use a new
-output root/run name. Use their `--dry-run` first.
+`run_ablations.py` and `run_far_source_modes.py` default to the old order and
+forward `--task-sequence clean pgd pgd_l2 patch` for reverse-order experiments.
+Use a separate output root/run name and inspect their `--dry-run` first.
+`run_replay_study.py` uses the old order and does not accept `--task-sequence`.
+For a reverse-order selector study, use the reverse DASR entry separately for
+each policy; controls can use `--match-schedule` with the DTR run's
+`replay_schedule.json` when matching replay activation is required.
 
 ## 5. Selection, resume and evaluation
 
@@ -172,9 +202,12 @@ epoch=3. A one-epoch diagnostic phase has W=0. Accuracy means include 0%; ties
 retain the earlier eligible checkpoint. The scheduler and selector use one
 shared function. Warmup epochs still train, validate and save resume state.
 
-This does not make every selection dataset identical: SSEAT/CRT retain full
-validation for the current task and the fixed monitor for previous tasks;
-DASR and the four additional baselines use full validation for selection.
+All trainers use full validation for best-checkpoint selection. SSEAT/CRT use
+the same full-validation results for both current and historical tasks in
+their logs and selection scores. FAR monitor/history sizes remain 500/500.
+Explicit diagnostic evaluation batch limits still truncate validation; omit
+them in formal experiments. The selection-policy version has changed: use
+a new run directory instead of resuming a pre-update native checkpoint.
 See [protocol details](docs/protocol.md).
 
 - DASR epoch continuation: repeat the exact command with `--resume --resume-mode epoch`.
@@ -223,6 +256,7 @@ need at least 2 GiB free temporary disk and explicitly skip otherwise. Real
 ResNet forward/backward tests are separate. Leave several GiB free for a full run.
 GitHub Actions runs the CPU suite; CUDA experiments remain the user's responsibility.
 `docs/TEST_REPORT.md` describes this release's local verification.
+The 2026-11-02 CPU regression completed with **323 passed and no skipped tests**.
 
 Run directories contain configs, environment metadata, metrics, checkpoints,
 resource records and final-test results. DASR and the baseline families have
@@ -234,7 +268,5 @@ by `.gitignore` and are not shipped in this source release.
 ## Attribution and publication
 
 See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for CRT provenance and external
-dependencies. No repository-wide license or author/paper metadata was invented
-during packaging. Confirm ownership and upstream redistribution terms, then add
-an appropriate LICENSE and your final citation before public release. Until
-then, stage the repository privately. See the [upload guide](docs/github_upload_zh.md).
+dependencies. This source snapshot does not include a repository-wide LICENSE
+or a finalized paper citation.

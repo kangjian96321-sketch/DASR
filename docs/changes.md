@@ -57,7 +57,8 @@ selection_mean = mean_selection(selection, seen)
 scheduler 同步走无 warmup 分支，不只是放宽 best 判定。
 
 未改变：历史缓存仍跨阶段保留；DTR/F/G 阶段准确率基准仍采用上一阶段 best；
-各方法原始 replay/loss 主体、预算、数据划分不变。SSEAT/CRT 的历史任务选模子集仍保留。
+各方法原始 replay/loss 主体、预算、数据划分不变。20261102 更新已将 SSEAT/CRT 的历史任务
+选模改为完整验证集，并复用该结果写日志，见 `FULL_VALIDATION_20261102.md`。
 四基线 monitor 默认也设为500，避免 Imagenette 验证集1000张时严格均衡配额不足。
 
 本次调整了旧测试中与当前实际 batch、协议指纹、固定 epoch>5 假设不符的断言；

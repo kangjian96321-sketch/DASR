@@ -38,7 +38,6 @@ from .common import (
     checkpoint_payload,
     config_from_args,
     evaluate_for_selection,
-    evaluate_seen,
     final_evaluation,
     generate_attack,
     isolated_random_seed,
@@ -466,14 +465,10 @@ def run(cfg: ExperimentConfig, options: CRTOptions) -> Dict[str, float]:
                     selection = evaluate_for_selection(
                         model, loaders, current_task, seen, cfg, device
                     )
-                    historical = [name for name in seen if name != current_task]
-                    validation = {current_task: selection[current_task]}
-                    if historical:
-                        validation.update(
-                            evaluate_seen(model, loaders.val, historical, cfg, device)
-                        )
-                    mean_accuracy = sum(validation.values()) / len(validation)
+                    # Log and select from the same full-validation pass.
+                    validation = dict(selection)
                     selection_mean = mean_selection(selection, seen)
+                    mean_accuracy = selection_mean
                     row = {
                         "stage": stage,
                         "task": current_task,

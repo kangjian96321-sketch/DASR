@@ -1,9 +1,15 @@
 {
-  "release": "DASR_GitHub_20261026",
-  "date": "2026-10-26",
-  "base_zip_sha256": "bff09925c2071cf53e92af294e3e4b25a2db6d58f6ed734d9b44461a2f6e269a",
-  "scope": "Identifier-aware rename only; algorithms and hyperparameters unchanged",
-  "inherited_python_ast_checks": 67,
+  "release": "DASR_full_validation_20261102",
+  "date": "2026-11-02",
+  "base": "DASR_GitHub_20261026",
+  "base_zip_sha256": "9743e5512aaf6ab5546f664e89cd41ae8c85cc12ebf02b3815f9c283f22acffb",
+  "scope": "Full-validation best selection for all trainers; reuse SSEAT/CRT validation; protocol version update",
+  "runtime_replacement_files": [
+    "dasr_aligned/common.py",
+    "dasr_aligned/crt.py",
+    "dasr_aligned/selection.py",
+    "dasr_aligned/sseat.py"
+  ],
   "manifest_excludes_itself": true,
   "files": [
     {
@@ -20,21 +26,6 @@
       "path": ".gitignore",
       "bytes": 430,
       "sha256": "8c28ce9c0105c335bc1caea0ee93744f6f821e7b82b35a63d932b6a017ee37b0"
-    },
-    {
-      "path": "README.md",
-      "bytes": 12686,
-      "sha256": "7fabd0bbf704bdced18e6b7c6fb164734de1784f0d41513818dace8f187600ac"
-    },
-    {
-      "path": "README_zh.md",
-      "bytes": 12882,
-      "sha256": "fcc0392281596c31e4201a2930a605584e900d43b4b7ac216f0884f2a83d46d7"
-    },
-    {
-      "path": "THIRD_PARTY_NOTICES.md",
-      "bytes": 1828,
-      "sha256": "80539d39b8b58ad543c49804fa52831f9c3ac344178227e2a116bfeec334ba59"
     },
     {
       "path": "ablation_config.py",
@@ -68,8 +59,8 @@
     },
     {
       "path": "dasr_aligned/common.py",
-      "bytes": 59579,
-      "sha256": "30c36336e2989aa414503998e49978df77b3e477c020b974158c969fe7e8a6a5"
+      "bytes": 59728,
+      "sha256": "3c4b7afae6e72e5271b13bdf52e7fc934a5db9181505759c5e75054dd29b5bdc"
     },
     {
       "path": "dasr_aligned/continual_baselines.py",
@@ -78,8 +69,8 @@
     },
     {
       "path": "dasr_aligned/crt.py",
-      "bytes": 22707,
-      "sha256": "d16c5dcc31f3127ec52525d0f1236c3be0709bca2f8e29702481608b50a7b949"
+      "bytes": 22437,
+      "sha256": "d61a855752903bd7b5309d84ea5f7c0f2bc56ba698e2441f04781b8dc4ce3ba2"
     },
     {
       "path": "dasr_aligned/crt_lp_alr.py",
@@ -98,13 +89,13 @@
     },
     {
       "path": "dasr_aligned/selection.py",
-      "bytes": 1792,
-      "sha256": "e0bd2b39191a62170d6732229eb1a01f97bcf7495b809cd181bcecf6e6c13367"
+      "bytes": 1808,
+      "sha256": "41018538fb2e133bd31a365b955a478561bb25c253d2d1b5a1758190ad2ddaa8"
     },
     {
       "path": "dasr_aligned/sseat.py",
-      "bytes": 25005,
-      "sha256": "3c588b4e48372325fd46557e02210f3690aa1af5bf79057c047eeffd4cf9abb5"
+      "bytes": 24813,
+      "sha256": "6ccc35def89206f0cfc95eb237af355db8a38fd0e2886eaac77f11eb8b182fd0"
     },
     {
       "path": "dasr_components.py",
@@ -112,19 +103,9 @@
       "sha256": "722a122c6eeb3d19cc247747bdac3f4e4f2f35fa9d9ed57808838515e1cfb50d"
     },
     {
-      "path": "docs/RENAME_20261026.md",
-      "bytes": 9350,
-      "sha256": "fccf7f568e21053ea0fc2da036b64d46abced8676c992222cf0703744338ec65"
-    },
-    {
-      "path": "docs/TEST_REPORT.md",
-      "bytes": 3346,
-      "sha256": "5a59846ac537850741cdec1a4febdacfb1c51832f1d6f7657a6575ac460b10e3"
-    },
-    {
       "path": "docs/changes.md",
-      "bytes": 3435,
-      "sha256": "361c89485e26aae6fc7d581fcf9a23682b5de09183b92a01a323b48bd26cd349"
+      "bytes": 3530,
+      "sha256": "8a3451d78ac421da0f6f084c45950eba2c9fb590fecb01705546047ce46ac385"
     },
     {
       "path": "docs/crt_alr_parity.json",
@@ -132,14 +113,24 @@
       "sha256": "a67348b82391d9e21df90b7761389f5540c445e9396640acfdb7fbd59296e4b0"
     },
     {
+      "path": "docs/FULL_VALIDATION_20261102.md",
+      "bytes": 5126,
+      "sha256": "e88b5e3c79200b41e8f674e3965b9127e956030acf68b886dc0e126adfd1a628"
+    },
+    {
       "path": "docs/github_upload_zh.md",
-      "bytes": 3134,
-      "sha256": "f8e648c6c665481d8f729ddb51dc38f3521e0f1d8a52758b3cd3c115bcda2b2e"
+      "bytes": 3256,
+      "sha256": "26f06a8bcc5813f0688219723fd0edf58238450292ca5f477f94d360398275c9"
     },
     {
       "path": "docs/protocol.md",
-      "bytes": 8030,
-      "sha256": "254a8e9acce12eecc3b7ff2255408c9ed1939e3fa53313d0bfa6d453ebf36c7c"
+      "bytes": 8299,
+      "sha256": "5f5c00f6908c8e390a77f77d33114f009160da99b82f5da86ad10919b87dc9da"
+    },
+    {
+      "path": "docs/RENAME_20261026.md",
+      "bytes": 9350,
+      "sha256": "fccf7f568e21053ea0fc2da036b64d46abced8676c992222cf0703744338ec65"
     },
     {
       "path": "docs/rename_file_map.json",
@@ -155,6 +146,11 @@
       "path": "docs/test_environment.json",
       "bytes": 414,
       "sha256": "1a35a2ce677d85f8c5526c3a3126fde830aaced257586d9bc25f9e69cbe42edd"
+    },
+    {
+      "path": "docs/TEST_REPORT.md",
+      "bytes": 7075,
+      "sha256": "d2823b120fcfe768087136ae3fe910825829a4afc157431ae8642ffa1804cb1f"
     },
     {
       "path": "environment-cpu.yml",
@@ -210,6 +206,16 @@
       "path": "plot_final_features.py",
       "bytes": 985,
       "sha256": "13f6c01b4fc780e0be15f9fa535bda0f7625364a8aeb900d2d466ff7e4781ed3"
+    },
+    {
+      "path": "README.md",
+      "bytes": 14357,
+      "sha256": "508b6bd30e86655fd1f3abee32486d7819f3c0f390e3df45183810f547d86ecb"
+    },
+    {
+      "path": "README_zh.md",
+      "bytes": 14301,
+      "sha256": "d28d70bf80bcd4911309a38e8336b7ae379969e64348c294f37679078cffc145"
     },
     {
       "path": "replay_policies.py",
@@ -322,6 +328,11 @@
       "sha256": "4c4d482325ae080f302031b74fcf05e9d76d26d47486567f1b3323172d8309d9"
     },
     {
+      "path": "tests/test_full_validation_selection.py",
+      "bytes": 6001,
+      "sha256": "c457e8d9bb05082c4d0cedf70df838d275553f3f9b36a24f4b1a8a60c7550547"
+    },
+    {
       "path": "tests/test_joint_training.py",
       "bytes": 14780,
       "sha256": "f159744aea083f814095554dad0c5dd55e738e08e3d00582f485fd0588725f2b"
@@ -347,14 +358,9 @@
       "sha256": "2adee71cd5a669268deedbabc3ae59a6dc7261ed1a6f5167d98d66d96296aaec"
     },
     {
-      "path": "train_DASR.py",
-      "bytes": 66362,
-      "sha256": "1794c150998065e7e8d76fc812bff3cfaa867ca168d7eaed81a0760e5caeaa13"
-    },
-    {
-      "path": "train_DASR_clean_linf_l2_patch.py",
-      "bytes": 1051,
-      "sha256": "c8345357226c70e7b8d66acbe94cffc886e6d864614592a91f1d6fe49d253e24"
+      "path": "THIRD_PARTY_NOTICES.md",
+      "bytes": 1828,
+      "sha256": "80539d39b8b58ad543c49804fa52831f9c3ac344178227e2a116bfeec334ba59"
     },
     {
       "path": "train_crt_clean_linf_l2_patch.py",
@@ -365,6 +371,16 @@
       "path": "train_crt_dasr_aligned.py",
       "bytes": 127,
       "sha256": "0191c0bb92fb0b561941b007edd6c74c0623c069b9652debbefb814fb4d98f47"
+    },
+    {
+      "path": "train_DASR.py",
+      "bytes": 66362,
+      "sha256": "1794c150998065e7e8d76fc812bff3cfaa867ca168d7eaed81a0760e5caeaa13"
+    },
+    {
+      "path": "train_DASR_clean_linf_l2_patch.py",
+      "bytes": 1051,
+      "sha256": "c8345357226c70e7b8d66acbe94cffc886e6d864614592a91f1d6fe49d253e24"
     },
     {
       "path": "train_derpp_baseline.py",
