@@ -2,9 +2,8 @@
 
 TRADES outer loss and MART retain their defining objectives. KL inner attacks
 extend TRADES to the project's Patch/L2/Linf constraints; this is not a
-bit-for-bit copy of the official L2 solver. GSA below preserves the supplied
-gradient projection plus reference-gradient implementation, not an asserted
-reproduction of an unidentified GSA paper.
+bit-for-bit copy of the official L2 solver. Active GSA uses source_replay.runner and its accumulated PN-based objective.
+The old gradient helper remains solely for compatibility and historical tests.
 """
 from __future__ import annotations
 
@@ -59,12 +58,12 @@ class BaselineOptions:
                           stage_memory="keep_end_of_stage_memory_when_loading_selected_model")
         if self.method == "derpp":
             result.update(alpha=self.der_alpha, beta=self.der_beta,
-                          stored="fixed_adversarial_view_label_preupdate_logit",
-                          replay="one_shared_batch_for_MSE_and_CE")
+                          stored="clean_seed_fixed_adversarial_anchor_label_preupdate_anchor_logit_source_stage",
+                          replay="same_sample_ids; fixed_anchor_MSE; regenerated_SOURCE_attack_CE",
+                          version="derpp_source_ce_anchor_mse_v1_20261106")
         if self.method == "gsa":
-            result.update(variant="provided_gradient_projection_plus_reference",
-                          stored="augmented_clean_view_and_label",
-                          replay="regenerate_CURRENT_stage_attack_on_clean_memory")
+            from .source_replay.runner import from_host_options
+            result = from_host_options(self).spec()
         if self.method in ("trades", "mart"):
             result.update(beta_patch=self.beta_patch, beta_l2=self.beta_l2, beta_linf=self.beta_linf)
         if self.method == "trades":

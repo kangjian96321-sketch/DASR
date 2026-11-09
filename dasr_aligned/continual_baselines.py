@@ -15,10 +15,12 @@ import torch.nn.functional as F
 
 from .selection import best_eligible, selection_mean, warmup_epochs, validate_sequence
 from .baseline_losses import (
-    METHODS, BaselineOptions, backward_gsa, generate_kl_attack,
+    METHODS, BaselineOptions, generate_kl_attack,
     mart_objective, trades_objective,
 )
 from .baseline_memory import ReplayMemory
+from .source_replay.derpp_memory import DERSourceMemory
+from .source_replay.routing import regenerate_history
 from .common import (
     TASKS, EMA, StageResourceTracker, add_shared_arguments, attack_logits,
     build_dataloaders, config_from_args, config_to_dict, evaluate_seen, generate_attack,
@@ -48,7 +50,8 @@ def protocol_settings(cfg, options):
         for name in ("depth", "widen_factor", "dropout"):
             values.pop(name, None)
     return {
-        "version": VERSION, "config": values, "method_options": options.spec(),
+        "version": ("derpp_source_ce_anchor_mse_v1_20261106" if options.method == "derpp" else VERSION),
+        "config": values, "method_options": options.spec(),
         "selection": "EMA mean accuracy of ALL seen tasks on full validation; zeros included",
         "stage_start": "previous stage selected EMA model",
         "memory_boundary": "retain final exposure reservoir, not rewind to best epoch",
@@ -58,12 +61,18 @@ def protocol_settings(cfg, options):
 def make_memory(cfg, options):
     if options.method not in ("derpp", "gsa"):
         return None
-    return ReplayMemory(options.buffer_size, (3, cfg.image_size, cfg.image_size),
-                        cfg.num_classes, options.method == "derpp", cfg.seed + 8257)
+    if options.method == "derpp":
+        return DERSourceMemory(options.buffer_size, (3, cfg.image_size, cfg.image_size),
+                               cfg.num_classes, cfg.seed + 8257, cfg.task_sequence)
+    from .source_replay.memory import HistoricalMemory
+    return HistoricalMemory(options.buffer_size, (3, cfg.image_size, cfg.image_size),
+                            cfg.num_classes, cfg.seed + 8257)
 
 
 def train_epoch(model, ema, loader, optimizer, task, stage, epoch, cfg, options,
                 memory, device, tracker=None):
+    if options.method == "gsa":
+        raise ValueError("Active GSA uses source_replay.runner with explicit statistics and frozen memory")
     model.train()
     sums = dict(loss=0., classification=0., replay_ce=0., logit_mse=0.,
                 robust_kl=0., gradient_conflicts=0, gradient_projections=0,
@@ -86,16 +95,22 @@ def train_epoch(model, ema, loader, optimizer, task, stage, epoch, cfg, options,
                 tracker.add_adversarial_samples("current_training", count)
 
         replay = memory.sample(options.replay_batch_size or cfg.batch_size, device) if memory else None
-        if replay is not None and options.method == "gsa":
-            # Preserve the supplied GSA semantics: CURRENT attack on stored clean
-            # views, not each view's historical attack and not fixed adversarial replay.
-            replay["images"] = generate_attack(
-                model, replay["images"], replay["labels"], task, cfg, training=True,
-                rng_seed=training_attack_seed(cfg, stage, epoch, batch_index, stream=1))
-            if task != "clean":
-                sums["generated_replay"] += len(replay["labels"])
-                if tracker is not None:
-                    tracker.add_adversarial_samples("replay_training", len(replay["labels"]))
+        replay_attacked = None
+        if replay is not None and options.method == "derpp":
+            clean_replay = {**replay, "images": replay["clean_images"]}
+            replay_attacked, routed, generated = regenerate_history(
+                model, clean_replay, cfg.task_sequence, stage, epoch, batch_index, cfg,
+                attack_function=generate_attack, allow_current=True)
+            sums["generated_replay"] += generated
+            sums.setdefault("clean_replay_examples", 0)
+            sums["clean_replay_examples"] += len(replay["labels"]) - generated
+            sources = sums.setdefault("replay_by_source", {})
+            for source, record in routed.items():
+                aggregate = sources.setdefault(source, {"attack": record["attack"], "examples": 0, "generated": 0})
+                aggregate["examples"] += record["examples"]
+                aggregate["generated"] += record["generated"]
+            if tracker is not None:
+                tracker.add_adversarial_samples("replay_training", generated)
 
         model.train()
         zero = images.new_zeros(())
@@ -111,26 +126,18 @@ def train_epoch(model, ema, loader, optimizer, task, stage, epoch, cfg, options,
             loss = classification
 
         if replay is not None:
-            replay_logits = attack_logits(model, replay["images"])
-            replay_ce = F.cross_entropy(replay_logits, replay["labels"])
-            if options.method == "derpp":
-                mse = F.mse_loss(replay_logits, replay["logits"])
-                loss = loss + options.der_alpha * mse + options.der_beta * replay_ce
-            else:
-                # Report the sum for scale diagnostics; projected GSA gradients
-                # are not, in general, the gradient of this scalar sum.
-                loss = loss + replay_ce
+            # Keep the host's adversarial-logit anchor, including its forward order.
+            anchor_logits = attack_logits(model, replay["images"])
+            mse = F.mse_loss(anchor_logits, replay["logits"])
+            regenerated_logits = attack_logits(model, replay_attacked)
+            replay_ce = F.cross_entropy(regenerated_logits, replay["labels"])
+            loss = loss + options.der_alpha * mse + options.der_beta * replay_ce
             sums["replay_examples"] += len(replay["labels"])
             sums["replay_batches"] += 1
 
         if not bool(torch.isfinite(loss)):
             raise FloatingPointError(f"Non-finite {options.method} loss: {task} epoch {epoch}")
-        if options.method == "gsa" and replay is not None:
-            diagnostics = backward_gsa(classification, replay_ce, model)
-            sums["gradient_conflicts"] += int(diagnostics["gradient_conflict"])
-            sums["gradient_projections"] += 1
-        else:
-            loss.backward()
+        loss.backward()
         if options.grad_clip:
             torch.nn.utils.clip_grad_norm_(model.parameters(), options.grad_clip, error_if_nonfinite=True)
         optimizer.step()
@@ -138,8 +145,7 @@ def train_epoch(model, ema, loader, optimizer, task, stage, epoch, cfg, options,
         if memory is not None:
             # The stored DER logits were computed BEFORE optimizer.step; they
             # describe the same fixed adversarial pixels that enter the buffer.
-            memory.add(attacked if options.method == "derpp" else images, labels, stage,
-                       logits=logits if options.method == "derpp" else None)
+            memory.add(attacked, labels, stage, logits=logits, clean_images=images)
         for name, value in (("loss", loss), ("classification", classification),
                             ("replay_ce", replay_ce), ("logit_mse", mse), ("robust_kl", robust)):
             sums[name] += float(value.detach()) * count
@@ -155,6 +161,9 @@ def train_epoch(model, ema, loader, optimizer, task, stage, epoch, cfg, options,
 
 
 def run(cfg, options, eval_only=False):
+    if options.method == "gsa":
+        from .source_replay.runner import run as run_gsa, from_host_options
+        return run_gsa(cfg, from_host_options(options), eval_only=eval_only)
     options.validate()
     tasks = validate_sequence(cfg.task_sequence)
     if any(cfg.task_epochs[t] <= 0 for t in tasks):
@@ -262,7 +271,7 @@ def run(cfg, options, eval_only=False):
             if improved:
                 atomic_checkpoint(cfg.run_dir / f"stage{stage}_{task}_best.pt", best_snapshot)
             payload = {
-                "version": VERSION, "signature": signature, "settings": settings,
+                "version": settings["version"], "signature": signature, "settings": settings,
                 "split_signature": split_signature, "stage": stage, "task": task,
                 "next_epoch": epoch + 1, "model": cpu_tree(model.state_dict()),
                 "ema": cpu_tree(ema.state_dict()), "optimizer": cpu_tree(optimizer.state_dict()),
@@ -340,7 +349,7 @@ def build_parser(method):
         parser.add_argument("--" + flag, type=float)
     if method in ("derpp", "gsa"):
         parser.add_argument("--buffer-size", type=int, default=5120,
-                            help="Float32 CPU reservoir capacity; 5120 Imagenette images cost about 1.46 GiB.")
+                            help="CPU slots, unchanged default; DER++ keeps clean+anchor views (~2.93 GiB for 5120 Imagenette slots).")
         parser.add_argument("--replay-batch-size", type=int, default=None,
                             help="Defaults to training batch size; sample without replacement.")
     if method == "derpp":
@@ -417,6 +426,12 @@ def main(method, argv=None):
         cfg, options = resolve_config(method, args)
     except ValueError as error:
         parser.error(str(error))
+    if args.dry_run and method == "gsa":
+        from .source_replay.runner import from_host_options, protocol_settings as gsa_settings
+        gsa_options = from_host_options(options)
+        print(json.dumps({"config": config_to_dict(cfg), "options": gsa_options.spec(),
+                          "settings": gsa_settings(cfg, gsa_options)}, indent=2, ensure_ascii=False))
+        return
     if args.dry_run:
         print(json.dumps({"config": config_to_dict(cfg), "options": options.spec(),
                           "settings": protocol_settings(cfg, options)}, indent=2, ensure_ascii=False))

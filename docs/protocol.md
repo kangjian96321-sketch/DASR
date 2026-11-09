@@ -79,13 +79,15 @@ do not expose every such override: inspect `--help`, do not assume flags transfe
 | CRT | Croce attack sampling; Lp ALR1 step; weight1 for first adversarial stage, .5 thereafter; clean has no ALR |
 | TRADES | KL inner objective by default, CE option retained; beta Patch/L2/Linf=1/1/6 |
 | MART | boosted adversarial CE + misclassification-aware KL; beta1/1/6 |
-| DER++ | exposure reservoir5120; fixed adversarial image, label and pre-update logits; alpha=.5, beta=.5 |
-| GSA | exposure reservoir5120 clean views; CURRENT-stage re-attack; gradient projection plus reference gradient |
+| DER++ | exposure reservoir5120 paired clean seeds and fixed adversarial anchors; anchor-logit MSE + source-attack regenerated replay CE; alpha=.5, beta=.5 |
+| GSA | historical reservoir5120 clean views; frozen within each stage; source-stage re-attack; one accumulated-PN-weighted CE |
 | Joint | equal mean CE over selected conditions, shared BN, no teacher/replay/LACD/ALR |
 
-DER++/GSA replay batch defaults to training batch; their memory remains the final
-exposure reservoir when the model rewinds to a stage best. These are this
-project's variants; GSA is not claimed to reproduce an unidentified upstream paper.
+DER++/GSA replay batch defaults to the host training batch. DER++ retains its final
+exposure reservoir when the model rewinds to a stage best. GSA restores the selected
+model and same-epoch PN statistics, then commits one training-set pass to its frozen
+historical reservoir. GSA adapts Guo et al. (CVPR 2023) to fixed labels with one weighted
+objective; it does not use the former gradient-projection routine. See SOURCE_REPLAY_README_zh.txt.
 
 ## Checkpoint selection
 
