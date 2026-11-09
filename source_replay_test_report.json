@@ -1,0 +1,52 @@
+{
+  "variant": "dasr_main",
+  "base_archive_sha256": "40051becc3cdf0283c676b43e38fdef8d2607279d106318d710dd9f18aa00eae",
+  "tests": {
+    "passed": 342,
+    "skipped": [
+      {
+        "test": "tests.test_source_replay::test_shared_base_mode_keeps_host_origin[derpp]",
+        "status": "skipped",
+        "reason": "This host has no shared-base feature"
+      },
+      {
+        "test": "tests.test_source_replay::test_shared_base_mode_keeps_host_origin[gsa]",
+        "status": "skipped",
+        "reason": "This host has no shared-base feature"
+      }
+    ],
+    "total_unique_tests": 344,
+    "failures": 0,
+    "source_logs": [
+      "full_regression_final.xml",
+      "disk_retry.xml"
+    ]
+  },
+  "configuration_comparisons": 52,
+  "all_parsed_host_settings_identical": true,
+  "parser_flags_defaults_identical": true,
+  "trades_mart_step_parameters_and_protocols_identical": true,
+  "previous_gsa_objective_file_identical": true,
+  "gsa_objective_sha256": "22e987926e5eb47449b024b8d33c2ee832978dff9c5db9c413f921c29f327a1b",
+  "changed_original_files": [
+    "README.md",
+    "README_zh.md",
+    "train_gsa_baseline.py",
+    "dasr_aligned/baseline_losses.py",
+    "dasr_aligned/continual_baselines.py",
+    "docs/protocol.md",
+    "tests/test_four_baselines.py"
+  ],
+  "unchanged_original_file_count": 85,
+  "changed_runtime_files": [
+    "train_gsa_baseline.py",
+    "dasr_aligned/baseline_losses.py",
+    "dasr_aligned/continual_baselines.py"
+  ],
+  "notes": [
+    "CPU numerical and synthetic integration checks; not a full dataset training result.",
+    "ResNet-18 tests use real model code; no CUDA or full AutoAttack performance claim.",
+    "Disk-gated tests were rerun after removing generated temporary checkpoints.",
+    "Two shared-base-only tests do not apply to the DASR-main archive."
+  ]
+}
